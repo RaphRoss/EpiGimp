@@ -6,7 +6,9 @@ public:
     Canvas(int width, int height);
 
     void draw(sf::RenderWindow& window);
+    sf::RenderTexture& getTexture();
 
 private:
-    sf::RectangleShape background;
+    sf::RenderTexture renderTexture;
+    sf::Sprite sprite;
 };
