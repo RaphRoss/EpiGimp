@@ -16,3 +16,9 @@ void Canvas::draw(sf::RenderWindow& window) {
 sf::RenderTexture& Canvas::getTexture() {
     return renderTexture;
 }
+
+void Canvas::saveToFile(const std::string& filename) {
+    sf::Texture tex = renderTexture.getTexture();
+    sf::Image screenshot = tex.copyToImage();
+    screenshot.saveToFile(filename);
+}

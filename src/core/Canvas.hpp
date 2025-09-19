@@ -7,6 +7,7 @@ public:
 
     void draw(sf::RenderWindow& window);
     sf::RenderTexture& getTexture();
+    void saveToFile(const std::string& filename);
 
 private:
     sf::RenderTexture renderTexture;

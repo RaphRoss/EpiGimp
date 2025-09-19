@@ -4,15 +4,13 @@
 Application::Application(int width, int height, const std::string& title)
     : window(sf::VideoMode(width, height), title), canvas(width, height) {
     window.setFramerateLimit(60);
-
     currentTool = ToolFactory::createTool("pencil", canvas);
-}
-
-void Application::run() {
-    while (window.isOpen()) {
-        processEvents();
-        render();
-    }
+    Button saveBtn({10, 10}, {80, 30}, "Save");
+    saveBtn.setCallback([this]() {
+        canvas.saveToFile("drawing.png");
+        std::cout << "Image sauvegardée : drawing.png" << std::endl;
+    });
+    toolbar.addButton(saveBtn);
 }
 
 void Application::processEvents() {
@@ -22,21 +20,26 @@ void Application::processEvents() {
             window.close();
         }
 
+        sf::Vector2i pixelPos;
+        sf::Vector2f pos;
+
         if (!currentTool) continue;
 
         if (event.type == sf::Event::MouseButtonPressed) {
-            sf::Vector2i pixelPos(event.mouseButton.x, event.mouseButton.y);
-            sf::Vector2f pos = window.mapPixelToCoords(pixelPos);
-            currentTool->onMousePressed(pos);
+            pixelPos = {event.mouseButton.x, event.mouseButton.y};
+            pos = window.mapPixelToCoords(pixelPos);
+            toolbar.handleClick(pos);
+            if (pos.y > 50)
+                currentTool->onMousePressed(pos);
         }
         else if (event.type == sf::Event::MouseButtonReleased) {
-            sf::Vector2i pixelPos(event.mouseButton.x, event.mouseButton.y);
-            sf::Vector2f pos = window.mapPixelToCoords(pixelPos);
+            pixelPos = {event.mouseButton.x, event.mouseButton.y};
+            pos = window.mapPixelToCoords(pixelPos);
             currentTool->onMouseReleased(pos);
         }
         else if (event.type == sf::Event::MouseMoved) {
-            sf::Vector2i pixelPos(event.mouseMove.x, event.mouseMove.y);
-            sf::Vector2f pos = window.mapPixelToCoords(pixelPos);
+            pixelPos = {event.mouseMove.x, event.mouseMove.y};
+            pos = window.mapPixelToCoords(pixelPos);
             currentTool->onMouseMoved(pos);
         }
     }
@@ -45,5 +48,14 @@ void Application::processEvents() {
 void Application::render() {
     window.clear(sf::Color::White);
     canvas.draw(window);
+    toolbar.draw(window);
     window.display();
+}
+
+
+void Application::run() {
+    while (window.isOpen()) {
+        processEvents();
+        render();
+    }
 }

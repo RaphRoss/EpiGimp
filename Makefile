@@ -1,4 +1,4 @@
-TARGET = MiniGIMP
+TARGET = EpiGIMP
 
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -I./src -I./src/core -I./src/tools
