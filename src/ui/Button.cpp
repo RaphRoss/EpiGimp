@@ -1,4 +1,8 @@
 #include "Button.hpp"
+#include <iostream>
+
+sf::Font Button::font;
+bool Button::fontLoaded = false;
 
 Button::Button(const sf::Vector2f& pos, const sf::Vector2f& size, const std::string& text) {
     shape.setPosition(pos);
@@ -6,11 +10,17 @@ Button::Button(const sf::Vector2f& pos, const sf::Vector2f& size, const std::str
     shape.setFillColor(sf::Color(200, 200, 200));
     shape.setOutlineColor(sf::Color::Black);
     shape.setOutlineThickness(2);
-
-    if (!font.loadFromFile("src/assets/fonts/DejaVuSans-Bold.ttf")) {
-        throw std::runtime_error("Impossible de charger la police !");
+    if (!fontLoaded) {
+        if (!font.loadFromFile("src/assets/fonts/DejaVuSans-Bold.ttf")) {
+            std::cerr << "Erreur: Impossible de charger la police !" << std::endl;
+            fontLoaded = false;
+        } else {
+            fontLoaded = true;
+        }
     }
-    label.setFont(font);
+    if (fontLoaded) {
+        label.setFont(font);
+    }
     label.setString(text);
     label.setCharacterSize(14);
     label.setFillColor(sf::Color::Black);
@@ -22,7 +32,9 @@ Button::Button(const sf::Vector2f& pos, const sf::Vector2f& size, const std::str
 
 void Button::draw(sf::RenderWindow& window) {
     window.draw(shape);
-    window.draw(label);
+    if (fontLoaded) {
+        window.draw(label);
+    }
 }
 
 bool Button::isHovered(const sf::Vector2f& mousePos) const {

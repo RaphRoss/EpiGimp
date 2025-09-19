@@ -7,7 +7,7 @@ void PencilTool::onMousePressed(const sf::Vector2f& pos) {
     lastPos = pos;
 }
 
-void PencilTool::onMouseReleased(const sf::Vector2f& pos) {
+void PencilTool::onMouseReleased(const sf::Vector2f& /* pos */) {
     drawing = false;
     lastPos.reset();
 }

@@ -16,9 +16,9 @@ public:
 private:
     sf::RectangleShape shape;
     sf::Text label;
-    sf::Font font;
     std::function<void()> callback;
-
+    static sf::Font font;
+    static bool fontLoaded;
 public:
     void onClick(const sf::Vector2f& mousePos);
 };
