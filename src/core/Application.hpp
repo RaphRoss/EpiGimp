@@ -18,6 +18,11 @@ private:
     void setupMenus();
     void setupToolPanel();
     void handleCanvasInput(const sf::Event& event);
+    void saveFile();
+    void saveAsFile();
+    void openFile();
+    std::string openFileDialog();
+    std::string saveFileDialog();
 
 private:
     sf::RenderWindow window;
@@ -25,4 +30,5 @@ private:
     std::unique_ptr<Tool> currentTool;
     MenuBar menuBar;
     ToolPanel toolPanel;
+    std::string currentFilePath;
 };
