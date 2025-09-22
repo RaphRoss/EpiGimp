@@ -5,12 +5,58 @@ Application::Application(int width, int height, const std::string& title)
     : window(sf::VideoMode(width, height), title), canvas(width, height) {
     window.setFramerateLimit(60);
     currentTool = ToolFactory::createTool("pencil", canvas);
-    Button saveBtn({10, 10}, {80, 30}, "Save");
-    saveBtn.setCallback([this]() {
+    
+    setupMenus();
+    setupToolPanel();
+}
+
+void Application::setupMenus() {
+    menuBar.addMenu("File");
+    
+    menuBar.addMenuItem("File", "Enregistrer", [this]() {
         canvas.saveToFile("drawing.png");
-        std::cout << "Image sauvegardée : drawing.png" << std::endl;
     });
-    toolbar.addButton(saveBtn);
+    
+    menuBar.addMenuItem("File", "Importer", [this]() {
+        canvas.loadFromFile("test_image.png");
+    });
+}
+
+void Application::setupToolPanel() {
+    toolPanel.addTool("pencil", "Pinceau", [this]() {
+        currentTool = ToolFactory::createTool("pencil", canvas);
+    });
+    
+    toolPanel.setSelectedTool("pencil");
+}
+
+void Application::handleCanvasInput(const sf::Event& event) {
+    if (!currentTool) return;
+    
+    sf::Vector2i pixelPos;
+    sf::Vector2f pos;
+    
+    if (event.type == sf::Event::MouseButtonPressed) {
+        pixelPos = {event.mouseButton.x, event.mouseButton.y};
+        pos = window.mapPixelToCoords(pixelPos);
+        
+        if (canvas.getBounds().contains(pos)) {
+            sf::Vector2f canvasPos = pos - canvas.getPosition();
+            currentTool->onMousePressed(canvasPos);
+        }
+    }
+    else if (event.type == sf::Event::MouseButtonReleased) {
+        pixelPos = {event.mouseButton.x, event.mouseButton.y};
+        pos = window.mapPixelToCoords(pixelPos);
+        sf::Vector2f canvasPos = pos - canvas.getPosition();
+        currentTool->onMouseReleased(canvasPos);
+    }
+    else if (event.type == sf::Event::MouseMoved) {
+        pixelPos = {event.mouseMove.x, event.mouseMove.y};
+        pos = window.mapPixelToCoords(pixelPos);
+        sf::Vector2f canvasPos = pos - canvas.getPosition();
+        currentTool->onMouseMoved(canvasPos);
+    }
 }
 
 void Application::processEvents() {
@@ -23,35 +69,31 @@ void Application::processEvents() {
         sf::Vector2i pixelPos;
         sf::Vector2f pos;
 
-        if (!currentTool) continue;
-
         if (event.type == sf::Event::MouseButtonPressed) {
             pixelPos = {event.mouseButton.x, event.mouseButton.y};
             pos = window.mapPixelToCoords(pixelPos);
-            toolbar.handleClick(pos);
-            if (pos.y > 50)
-                currentTool->onMousePressed(pos);
+            
+            bool menuHandled = menuBar.handleClick(pos);
+            
+            if (!menuHandled && pos.y > 30) {
+                toolPanel.handleClick(pos);
+            }
         }
-        else if (event.type == sf::Event::MouseButtonReleased) {
-            pixelPos = {event.mouseButton.x, event.mouseButton.y};
-            pos = window.mapPixelToCoords(pixelPos);
-            currentTool->onMouseReleased(pos);
-        }
-        else if (event.type == sf::Event::MouseMoved) {
-            pixelPos = {event.mouseMove.x, event.mouseMove.y};
-            pos = window.mapPixelToCoords(pixelPos);
-            currentTool->onMouseMoved(pos);
-        }
+        
+        handleCanvasInput(event);
     }
 }
 
 void Application::render() {
-    window.clear(sf::Color::White);
+    window.clear(sf::Color(240, 240, 240));
+    
     canvas.draw(window);
-    toolbar.draw(window);
+    toolPanel.draw(window);
+    
+    menuBar.draw(window);
+    
     window.display();
 }
-
 
 void Application::run() {
     while (window.isOpen()) {

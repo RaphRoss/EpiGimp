@@ -3,7 +3,8 @@
 #include "Canvas.hpp"
 #include "../tools/Tool.hpp"
 #include <memory>
-#include "../ui/Toolbar.hpp"
+#include "../ui/MenuBar.hpp"
+#include "../ui/ToolPanel.hpp"
 #include <iostream>
 
 class Application {
@@ -14,10 +15,14 @@ public:
 private:
     void processEvents();
     void render();
+    void setupMenus();
+    void setupToolPanel();
+    void handleCanvasInput(const sf::Event& event);
 
 private:
     sf::RenderWindow window;
     Canvas canvas;
     std::unique_ptr<Tool> currentTool;
-    Toolbar toolbar;
+    MenuBar menuBar;
+    ToolPanel toolPanel;
 };

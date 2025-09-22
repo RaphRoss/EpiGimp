@@ -1,7 +1,7 @@
 TARGET = EpiGIMP
 
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -g -I./src -I./src/core -I./src/tools
+CXXFLAGS = -std=c++17 -Wall -Wextra -g -I./src -I./src/core -I./src/tools -I./src/ui
 
 SRC_DIR = src
 BUILD_DIR = build
