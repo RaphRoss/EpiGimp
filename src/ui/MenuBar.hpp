@@ -12,6 +12,7 @@ public:
     
     void draw(sf::RenderWindow& window);
     bool handleClick(const sf::Vector2f& mousePos); // Retourne true si le clic a été géré
+    void handleMouseMove(const sf::Vector2f& mousePos);
     
     static const float MENU_BAR_HEIGHT;
     

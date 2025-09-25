@@ -1,28 +1,27 @@
 #include "PencilTool.hpp"
 
-PencilTool::PencilTool(Canvas& c) : canvas(c) {}
+PencilTool::PencilTool() {}
 
-void PencilTool::onMousePressed(const sf::Vector2f& pos) {
+void PencilTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+    if (!image) return;
     drawing = true;
-    lastPos = pos;
+    lastPos = image->worldToImage(pos);
 }
 
-void PencilTool::onMouseReleased(const sf::Vector2f& /* pos */) {
+void PencilTool::onMouseReleased(const sf::Vector2f& /* pos */, Image* /* image */) {
     drawing = false;
     lastPos.reset();
 }
 
-void PencilTool::onMouseMoved(const sf::Vector2f& pos) {
-    if (!drawing || !lastPos.has_value()) return;
-
+void PencilTool::onMouseMoved(const sf::Vector2f& pos, Image* image) {
+    if (!drawing || !lastPos.has_value() || !image) return;
+    sf::Vector2f imagePos = image->worldToImage(pos);
     sf::Vertex line[] = {
         sf::Vertex(*lastPos, sf::Color::Black),
-        sf::Vertex(pos, sf::Color::Black)
+        sf::Vertex(imagePos, sf::Color::Black)
     };
-
-    auto& texture = canvas.getTexture();
+    auto& texture = image->getTexture();
     texture.draw(line, 2, sf::Lines);
     texture.display();
-
-    lastPos = pos;
+    lastPos = imagePos;
 }

@@ -4,16 +4,27 @@
 #include <string>
 
 Application::Application(int width, int height, const std::string& title)
-    : window(sf::VideoMode(width, height), title), canvas(width, height) {
+    : window(sf::VideoMode(width, height), title) {
     window.setFramerateLimit(60);
-    currentTool = ToolFactory::createTool("pencil", canvas);
-    
+    currentTool = ToolFactory::createTool("pencil");
+    imageManager.setViewportSize({static_cast<float>(width - 220), static_cast<float>(height - 50)});
     setupMenus();
     setupToolPanel();
+    newImageDialog.setOnConfirm([this](int width, int height, const std::string& name) {
+        imageManager.createNewImage(width, height, name);
+    });
 }
 
 void Application::setupMenus() {
     menuBar.addMenu("File");
+    
+    menuBar.addMenuItem("File", "New Image", [this]() {
+        newImage();
+    });
+    
+    menuBar.addMenuItem("File", "Open", [this]() {
+        openFile();
+    });
     
     menuBar.addMenuItem("File", "Save", [this]() {
         saveFile();
@@ -22,46 +33,52 @@ void Application::setupMenus() {
     menuBar.addMenuItem("File", "Save As", [this]() {
         saveAsFile();
     });
-    
-    menuBar.addMenuItem("File", "Open", [this]() {
-        openFile();
-    });
 }
 
 void Application::setupToolPanel() {
     toolPanel.addTool("pencil", "Pencil", [this]() {
-        currentTool = ToolFactory::createTool("pencil", canvas);
+        currentTool = ToolFactory::createTool("pencil");
     });
     
     toolPanel.setSelectedTool("pencil");
 }
 
-void Application::handleCanvasInput(const sf::Event& event) {
+void Application::handleImageInput(const sf::Event& event) {
     if (!currentTool) return;
-    
+    Image* currentImage = imageManager.getCurrentImage();
+    if (!currentImage) return;
     sf::Vector2i pixelPos;
     sf::Vector2f pos;
-    
     if (event.type == sf::Event::MouseButtonPressed) {
         pixelPos = {event.mouseButton.x, event.mouseButton.y};
         pos = window.mapPixelToCoords(pixelPos);
-        
-        if (canvas.getBounds().contains(pos)) {
-            sf::Vector2f canvasPos = pos - canvas.getPosition();
-            currentTool->onMousePressed(canvasPos);
+        if (imageManager.isPositionInCurrentImage(pos)) {
+            currentTool->onMousePressed(pos, currentImage);
         }
     }
     else if (event.type == sf::Event::MouseButtonReleased) {
         pixelPos = {event.mouseButton.x, event.mouseButton.y};
         pos = window.mapPixelToCoords(pixelPos);
-        sf::Vector2f canvasPos = pos - canvas.getPosition();
-        currentTool->onMouseReleased(canvasPos);
+        currentTool->onMouseReleased(pos, currentImage);
     }
     else if (event.type == sf::Event::MouseMoved) {
         pixelPos = {event.mouseMove.x, event.mouseMove.y};
         pos = window.mapPixelToCoords(pixelPos);
-        sf::Vector2f canvasPos = pos - canvas.getPosition();
-        currentTool->onMouseMoved(canvasPos);
+        currentTool->onMouseMoved(pos, currentImage);
+    }
+}
+
+void Application::handleZoom(const sf::Event& event) {
+    if (event.type == sf::Event::MouseWheelScrolled) {
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        sf::Vector2f pos = window.mapPixelToCoords(pixelPos);
+        if (imageManager.isPositionInCurrentImage(pos)) {
+            if (event.mouseWheelScroll.delta > 0) {
+                imageManager.zoomIn();
+            } else {
+                imageManager.zoomOut();
+            }
+        }
     }
 }
 
@@ -72,9 +89,22 @@ void Application::processEvents() {
             window.close();
         }
 
+        newImageDialog.handleEvent(event);
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.control && event.key.code == sf::Keyboard::S) {
                 saveFile();
+            } else if (event.key.control && event.key.code == sf::Keyboard::N) {
+                newImage();
+            } else if (event.key.control && event.key.code == sf::Keyboard::O) {
+                openFile();
+            } else if (event.key.code == sf::Keyboard::Add || event.key.code == sf::Keyboard::Equal) {
+                imageManager.zoomIn();
+            } else if (event.key.code == sf::Keyboard::Subtract || event.key.code == sf::Keyboard::Hyphen) {
+                imageManager.zoomOut();
+            } else if (event.key.code == sf::Keyboard::Num0) {
+                imageManager.resetZoom();
+            } else if (event.key.control && event.key.code == sf::Keyboard::Tab) {
+                imageManager.nextImage();
             }
         }
 
@@ -85,24 +115,40 @@ void Application::processEvents() {
             pixelPos = {event.mouseButton.x, event.mouseButton.y};
             pos = window.mapPixelToCoords(pixelPos);
             
-            bool menuHandled = menuBar.handleClick(pos);
-            
-            if (!menuHandled && pos.y > 30) {
-                toolPanel.handleClick(pos);
+            // Ne gérer les clics sur l'interface que si le dialogue n'est pas visible
+            if (!newImageDialog.isVisible()) {
+                bool menuHandled = menuBar.handleClick(pos);
+                
+                if (!menuHandled && pos.y > 30) {
+                    toolPanel.handleClick(pos);
+                }
             }
         }
         
-        handleCanvasInput(event);
+        if (event.type == sf::Event::MouseMoved) {
+            pixelPos = {event.mouseMove.x, event.mouseMove.y};
+            pos = window.mapPixelToCoords(pixelPos);
+            
+            // Gérer le survol des menus
+            if (!newImageDialog.isVisible()) {
+                menuBar.handleMouseMove(pos);
+            }
+        }
+        
+        // Gérer les entrées sur l'image
+        if (!newImageDialog.isVisible()) {
+            handleImageInput(event);
+            handleZoom(event);
+        }
     }
 }
 
 void Application::render() {
-    window.clear(sf::Color(240, 240, 240));
-    
-    canvas.draw(window);
+    window.clear(sf::Color(45, 45, 48));
+    imageManager.draw(window);
     toolPanel.draw(window);
-    
     menuBar.draw(window);
+    newImageDialog.draw(window);
     
     window.display();
 }
@@ -115,17 +161,23 @@ void Application::run() {
 }
 
 void Application::saveFile() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (!currentImage) return;
+    
     if (currentFilePath.empty()) {
         currentFilePath = saveFileDialog();
         if (currentFilePath.empty()) return;
     }
-    canvas.saveToFile(currentFilePath);
+    currentImage->saveToFile(currentFilePath);
 }
 
 void Application::saveAsFile() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (!currentImage) return;
+    
     std::string filePath = saveFileDialog();
     if (!filePath.empty()) {
-        canvas.saveToFile(filePath);
+        currentImage->saveToFile(filePath);
         currentFilePath = filePath;
     }
 }
@@ -133,9 +185,13 @@ void Application::saveAsFile() {
 void Application::openFile() {
     std::string filePath = openFileDialog();
     if (!filePath.empty()) {
-        canvas.loadFromFile(filePath);
+        imageManager.openImage(filePath);
         currentFilePath = filePath;
     }
+}
+
+void Application::newImage() {
+    newImageDialog.show();
 }
 
 std::string Application::openFileDialog() {

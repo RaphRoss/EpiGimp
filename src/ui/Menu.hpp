@@ -19,6 +19,7 @@ public:
     void addItem(const std::string& label, std::function<void()> callback);
     void draw(sf::RenderWindow& window);
     void handleClick(const sf::Vector2f& mousePos);
+    void handleMouseMove(const sf::Vector2f& mousePos);
     
     bool isOpen() const { return open; }
     void setOpen(bool state) { open = state; }
@@ -39,6 +40,7 @@ private:
     sf::Text titleText;
     std::vector<sf::RectangleShape> itemRects;
     std::vector<sf::Text> itemTexts;
+    int hoveredItemIndex = -1;
     
     static sf::Font font;
     static bool fontLoaded;

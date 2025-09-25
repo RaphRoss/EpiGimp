@@ -5,8 +5,8 @@ const float MenuBar::MENU_BAR_HEIGHT = 30.0f;
 MenuBar::MenuBar() {
     background.setPosition(0, 0);
     background.setSize({800, MENU_BAR_HEIGHT});
-    background.setFillColor(sf::Color(200, 200, 200));
-    background.setOutlineColor(sf::Color::Black);
+    background.setFillColor(sf::Color(37, 37, 38));
+    background.setOutlineColor(sf::Color(63, 63, 70));
     background.setOutlineThickness(1);
 }
 
@@ -32,7 +32,6 @@ void MenuBar::updateMenuPositions() {
 
 void MenuBar::draw(sf::RenderWindow& window) {
     window.draw(background);
-    
     for (auto& menu : menus) {
         menu->draw(window);
     }
@@ -40,7 +39,6 @@ void MenuBar::draw(sf::RenderWindow& window) {
 
 bool MenuBar::handleClick(const sf::Vector2f& mousePos) {
     bool clickedOnMenu = false;
-    
     for (auto& menu : menus) {
         if (menu->getTitleBounds().contains(mousePos) || 
             (menu->isOpen() && mousePos.y > MENU_BAR_HEIGHT && mousePos.x >= menu->getTitleBounds().left && 
@@ -49,16 +47,20 @@ bool MenuBar::handleClick(const sf::Vector2f& mousePos) {
             clickedOnMenu = true;
         }
     }
-    
     if (!clickedOnMenu && mousePos.y <= MENU_BAR_HEIGHT) {
         closeAllMenus();
     }
-    
     return clickedOnMenu || mousePos.y <= MENU_BAR_HEIGHT;
 }
 
 void MenuBar::closeAllMenus() {
     for (auto& menu : menus) {
         menu->setOpen(false);
+    }
+}
+
+void MenuBar::handleMouseMove(const sf::Vector2f& mousePos) {
+    for (auto& menu : menus) {
+        menu->handleMouseMove(mousePos);
     }
 }

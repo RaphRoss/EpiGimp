@@ -1,10 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Canvas.hpp"
+#include "ImageManager.hpp"
 #include "../tools/Tool.hpp"
 #include <memory>
 #include "../ui/MenuBar.hpp"
 #include "../ui/ToolPanel.hpp"
+#include "../ui/NewImageDialog.hpp"
 #include <iostream>
 
 class Application {
@@ -17,18 +18,21 @@ private:
     void render();
     void setupMenus();
     void setupToolPanel();
-    void handleCanvasInput(const sf::Event& event);
+    void handleImageInput(const sf::Event& event);
+    void handleZoom(const sf::Event& event);
     void saveFile();
     void saveAsFile();
     void openFile();
+    void newImage();
     std::string openFileDialog();
     std::string saveFileDialog();
 
 private:
     sf::RenderWindow window;
-    Canvas canvas;
+    ImageManager imageManager;
     std::unique_ptr<Tool> currentTool;
     MenuBar menuBar;
     ToolPanel toolPanel;
+    NewImageDialog newImageDialog;
     std::string currentFilePath;
 };
