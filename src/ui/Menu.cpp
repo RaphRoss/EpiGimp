@@ -123,12 +123,11 @@ void Menu::handleMouseMove(const sf::Vector2f& mousePos) {
             }
         }
         
-        // Mettre à jour les couleurs en fonction du survol
         for (size_t i = 0; i < itemRects.size(); ++i) {
             if (static_cast<int>(i) == hoveredItemIndex) {
-                itemRects[i].setFillColor(sf::Color(0, 122, 204)); // Bleu pour le survol
+                itemRects[i].setFillColor(sf::Color(0, 122, 204));
             } else {
-                itemRects[i].setFillColor(sf::Color(51, 51, 55)); // Couleur normale
+                itemRects[i].setFillColor(sf::Color(51, 51, 55));
             }
         }
     }

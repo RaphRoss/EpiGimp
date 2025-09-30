@@ -115,7 +115,6 @@ void Application::processEvents() {
             pixelPos = {event.mouseButton.x, event.mouseButton.y};
             pos = window.mapPixelToCoords(pixelPos);
             
-            // Ne gérer les clics sur l'interface que si le dialogue n'est pas visible
             if (!newImageDialog.isVisible()) {
                 bool menuHandled = menuBar.handleClick(pos);
                 
@@ -129,13 +128,11 @@ void Application::processEvents() {
             pixelPos = {event.mouseMove.x, event.mouseMove.y};
             pos = window.mapPixelToCoords(pixelPos);
             
-            // Gérer le survol des menus
             if (!newImageDialog.isVisible()) {
                 menuBar.handleMouseMove(pos);
             }
         }
         
-        // Gérer les entrées sur l'image
         if (!newImageDialog.isVisible()) {
             handleImageInput(event);
             handleZoom(event);

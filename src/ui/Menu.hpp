@@ -35,7 +35,6 @@ private:
     std::vector<MenuItem> items;
     bool open = false;
     
-    // Éléments graphiques
     sf::RectangleShape titleRect;
     sf::Text titleText;
     std::vector<sf::RectangleShape> itemRects;

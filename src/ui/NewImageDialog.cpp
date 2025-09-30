@@ -166,8 +166,8 @@ void NewImageDialog::updatePresetsList() {
         button.setSize({DIALOG_WIDTH - 40, 25});
         button.setPosition(dialogPos.x + 20, dialogPos.y + yOffset + i * 27);
         button.setFillColor(i == static_cast<size_t>(selectedPresetIndex) ? 
-                           sf::Color(0, 122, 204) : sf::Color(51, 51, 55)); // Bleu pour sélection, sombre sinon
-        button.setOutlineColor(sf::Color(63, 63, 70)); // Bordure gris foncé
+                           sf::Color(0, 122, 204) : sf::Color(51, 51, 55));
+        button.setOutlineColor(sf::Color(63, 63, 70));
         button.setOutlineThickness(1);
         presetButtons.push_back(button);
         
@@ -179,7 +179,7 @@ void NewImageDialog::updatePresetsList() {
         ss << presets[i].name << " (" << presets[i].width << "x" << presets[i].height << ")";
         text.setString(ss.str());
         text.setCharacterSize(12);
-        text.setFillColor(sf::Color(204, 204, 204)); // Texte gris clair
+        text.setFillColor(sf::Color(204, 204, 204));
         text.setPosition(dialogPos.x + 25, dialogPos.y + yOffset + i * 27 + 4);
         presetTexts.push_back(text);
     }

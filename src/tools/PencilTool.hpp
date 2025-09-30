@@ -13,5 +13,5 @@ public:
 
 private:
     bool drawing = false;
-    std::optional<sf::Vector2f> lastPos; // Pour tracer des segments
+    std::optional<sf::Vector2f> lastPos;
 };

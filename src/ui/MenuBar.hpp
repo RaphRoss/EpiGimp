@@ -11,7 +11,7 @@ public:
     void addMenuItem(const std::string& menuTitle, const std::string& itemLabel, std::function<void()> callback);
     
     void draw(sf::RenderWindow& window);
-    bool handleClick(const sf::Vector2f& mousePos); // Retourne true si le clic a été géré
+    bool handleClick(const sf::Vector2f& mousePos);
     void handleMouseMove(const sf::Vector2f& mousePos);
     
     static const float MENU_BAR_HEIGHT;
