@@ -27,11 +27,15 @@ public:
     
     void zoomIn();
     void zoomOut();
+    void zoomInAt(const sf::Vector2f& centerPoint);
+    void zoomOutAt(const sf::Vector2f& centerPoint);
     void resetZoom();
     void setZoom(float zoom);
     
     void draw(sf::RenderWindow& window);
     void setViewportSize(const sf::Vector2f& size) { viewportSize = size; }
+    void centerCurrentImage();
+    void fitCurrentImageToView();
     
     sf::Vector2f worldToImage(const sf::Vector2f& worldPos) const;
     sf::Vector2f imageToWorld(const sf::Vector2f& imagePos) const;

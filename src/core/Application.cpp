@@ -4,7 +4,7 @@
 #include <string>
 
 Application::Application(int width, int height, const std::string& title)
-    : window(sf::VideoMode(width, height), title) {
+    : window(sf::VideoMode(width, height), title), statusBar(static_cast<float>(width)) {
     window.setFramerateLimit(60);
     currentTool = ToolFactory::createTool("pencil");
     imageManager.setViewportSize({static_cast<float>(width - 220), static_cast<float>(height - 50)});
@@ -33,14 +33,42 @@ void Application::setupMenus() {
     menuBar.addMenuItem("File", "Save As", [this]() {
         saveAsFile();
     });
+    
+    // Add View menu
+    menuBar.addMenu("View");
+    
+    menuBar.addMenuItem("View", "Toggle Grid", [this]() {
+        toggleGrid();
+    });
+    
+    menuBar.addMenuItem("View", "Toggle Rulers", [this]() {
+        toggleRulers();
+    });
+    
+    menuBar.addMenuItem("View", "Center Image", [this]() {
+        centerImage();
+    });
+    
+    menuBar.addMenuItem("View", "Fit Image to View", [this]() {
+        fitImageToView();
+    });
 }
 
 void Application::setupToolPanel() {
     toolPanel.addTool("pencil", "Pencil", [this]() {
         currentTool = ToolFactory::createTool("pencil");
+        currentToolName = "Pencil";
+        statusBar.updateToolInfo(currentToolName);
+    });
+    
+    toolPanel.addTool("pan", "Pan", [this]() {
+        currentTool = ToolFactory::createTool("pan");
+        currentToolName = "Pan";
+        statusBar.updateToolInfo(currentToolName);
     });
     
     toolPanel.setSelectedTool("pencil");
+    statusBar.updateToolInfo("Pencil");
 }
 
 void Application::handleImageInput(const sf::Event& event) {
@@ -74,9 +102,15 @@ void Application::handleZoom(const sf::Event& event) {
         sf::Vector2f pos = window.mapPixelToCoords(pixelPos);
         if (imageManager.isPositionInCurrentImage(pos)) {
             if (event.mouseWheelScroll.delta > 0) {
-                imageManager.zoomIn();
+                imageManager.zoomInAt(pos);
             } else {
-                imageManager.zoomOut();
+                imageManager.zoomOutAt(pos);
+            }
+            
+            // Update status bar with new zoom level
+            Image* currentImage = imageManager.getCurrentImage();
+            if (currentImage) {
+                statusBar.updateZoomLevel(currentImage->getZoom());
             }
         }
     }
@@ -105,6 +139,26 @@ void Application::processEvents() {
                 imageManager.resetZoom();
             } else if (event.key.control && event.key.code == sf::Keyboard::Tab) {
                 imageManager.nextImage();
+            } else if (event.key.code == sf::Keyboard::G && event.key.control) {
+                toggleGrid();
+            } else if (event.key.code == sf::Keyboard::R && event.key.control) {
+                toggleRulers();
+            } else if (event.key.code == sf::Keyboard::Space) {
+                // Temporary pan tool with spacebar
+                currentTool = ToolFactory::createTool("pan");
+            } else if (event.key.code == sf::Keyboard::H) {
+                // Center image (H like "Home")
+                centerImage();
+            } else if (event.key.code == sf::Keyboard::F) {
+                // Fit image to view
+                fitImageToView();
+            }
+        }
+        
+        if (event.type == sf::Event::KeyReleased) {
+            if (event.key.code == sf::Keyboard::Space) {
+                // Return to previous tool
+                currentTool = ToolFactory::createTool("pencil");
             }
         }
 
@@ -130,6 +184,7 @@ void Application::processEvents() {
             
             if (!newImageDialog.isVisible()) {
                 menuBar.handleMouseMove(pos);
+                updateStatusBar(pos);
             }
         }
         
@@ -142,9 +197,34 @@ void Application::processEvents() {
 
 void Application::render() {
     window.clear(sf::Color(45, 45, 48));
-    imageManager.draw(window);
+    
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        sf::Vector2f imagePos = currentImage->getViewPosition();
+        sf::Vector2f imageSize = currentImage->getDisplaySize();
+        float zoom = currentImage->getZoom();
+        sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
+        sf::Vector2f mousePos = window.mapPixelToCoords(mousePixelPos);
+        
+        // Draw rulers first (behind image)
+        if (rulers.getVisible()) {
+            rulers.draw(window, imagePos, imageSize, zoom, mousePos);
+        }
+        
+        // Draw image
+        imageManager.draw(window);
+        
+        // Draw grid on top of image
+        if (grid.getVisible()) {
+            grid.draw(window, imagePos, imageSize, zoom);
+        }
+    } else {
+        imageManager.draw(window);
+    }
+    
     toolPanel.draw(window);
     menuBar.draw(window);
+    statusBar.draw(window);
     newImageDialog.draw(window);
     
     window.display();
@@ -257,4 +337,38 @@ std::string Application::saveFileDialog() {
     }
     
     return result;
+}
+
+void Application::updateStatusBar(const sf::Vector2f& mousePos) {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        // Update mouse position in image coordinates
+        if (imageManager.isPositionInCurrentImage(mousePos)) {
+            sf::Vector2f imagePos = currentImage->worldToImage(mousePos);
+            statusBar.updateMousePosition(imagePos, currentImage->getZoom());
+        }
+        
+        // Update zoom level
+        statusBar.updateZoomLevel(currentImage->getZoom());
+        
+        // Update image info
+        sf::Vector2i size = currentImage->getOriginalSize();
+        statusBar.updateImageInfo(currentImage->getName(), size.x, size.y);
+    }
+}
+
+void Application::toggleGrid() {
+    grid.setVisible(!grid.getVisible());
+}
+
+void Application::toggleRulers() {
+    rulers.setVisible(!rulers.getVisible());
+}
+
+void Application::centerImage() {
+    imageManager.centerCurrentImage();
+}
+
+void Application::fitImageToView() {
+    imageManager.fitCurrentImageToView();
 }

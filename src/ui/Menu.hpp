@@ -26,6 +26,7 @@ public:
     void toggleOpen() { open = !open; }
     
     sf::FloatRect getTitleBounds() const;
+    std::string getTitle() const { return title; }
     
 private:
     void updateLayout();

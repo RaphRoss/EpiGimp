@@ -9,8 +9,11 @@ public:
     ~Image() = default;
     void draw(sf::RenderWindow& window, const sf::Vector2f& position);
     void setZoom(float zoom);
+    void setZoomAt(float zoom, const sf::Vector2f& centerPoint);
     void zoomIn();
     void zoomOut();
+    void zoomInAt(const sf::Vector2f& centerPoint);
+    void zoomOutAt(const sf::Vector2f& centerPoint);
     void resetZoom();
     sf::RenderTexture& getTexture();
     sf::Vector2i getOriginalSize() const { return originalSize; }

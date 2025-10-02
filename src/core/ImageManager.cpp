@@ -1,24 +1,23 @@
 #include "ImageManager.hpp"
 #include <iostream>
+#include <algorithm>
 
 ImageManager::ImageManager() {
 }
 
 void ImageManager::createNewImage(int width, int height, const std::string& name) {
     auto newImage = std::make_unique<Image>(width, height, name);
-    newImage->setViewPosition(imageViewPosition);
     images.push_back(std::move(newImage));
     currentImageIndex = images.size() - 1;
-    updateImagePositions();
+    fitCurrentImageToView(); // Ajuster automatiquement à la vue
     std::cout << "Nouvelle image créée: " << name << " (" << width << "x" << height << ")" << std::endl;
 }
 
 void ImageManager::openImage(const std::string& filepath) {
     auto newImage = std::make_unique<Image>(filepath);
-    newImage->setViewPosition(imageViewPosition);
     images.push_back(std::move(newImage));
     currentImageIndex = images.size() - 1;
-    updateImagePositions();
+    fitCurrentImageToView(); // Ajuster automatiquement à la vue
 }
 
 void ImageManager::closeImage(size_t index) {
@@ -41,14 +40,14 @@ void ImageManager::closeCurrentImage() {
 void ImageManager::setActiveImage(size_t index) {
     if (index < images.size()) {
         currentImageIndex = index;
-        updateImagePositions();
+        centerCurrentImage();
     }
 }
 
 void ImageManager::nextImage() {
     if (!images.empty()) {
         currentImageIndex = (currentImageIndex + 1) % images.size();
-        updateImagePositions();
+        centerCurrentImage();
     }
 }
 
@@ -59,7 +58,7 @@ void ImageManager::previousImage() {
         } else {
             currentImageIndex--;
         }
-        updateImagePositions();
+        centerCurrentImage();
     }
 }
 
@@ -105,6 +104,20 @@ void ImageManager::zoomOut() {
     }
 }
 
+void ImageManager::zoomInAt(const sf::Vector2f& centerPoint) {
+    Image* current = getCurrentImage();
+    if (current) {
+        current->zoomInAt(centerPoint);
+    }
+}
+
+void ImageManager::zoomOutAt(const sf::Vector2f& centerPoint) {
+    Image* current = getCurrentImage();
+    if (current) {
+        current->zoomOutAt(centerPoint);
+    }
+}
+
 void ImageManager::resetZoom() {
     Image* current = getCurrentImage();
     if (current) {
@@ -122,14 +135,56 @@ void ImageManager::setZoom(float zoom) {
 void ImageManager::draw(sf::RenderWindow& window) {
     Image* current = getCurrentImage();
     if (current) {
-        current->draw(window, imageViewPosition);
+        current->draw(window, current->getViewPosition());
+    }
+}
+
+void ImageManager::centerCurrentImage() {
+    Image* current = getCurrentImage();
+    if (current) {
+        sf::Vector2i imageSize = current->getOriginalSize();
+        float zoom = current->getZoom();
+        
+        // Calculer la position pour centrer l'image dans la zone de travail
+        float centerX = imageViewPosition.x + (viewportSize.x - imageSize.x * zoom) / 2.0f;
+        float centerY = imageViewPosition.y + (viewportSize.y - imageSize.y * zoom) / 2.0f;
+        
+        current->setViewPosition({centerX, centerY});
+    }
+}
+
+void ImageManager::fitCurrentImageToView() {
+    Image* current = getCurrentImage();
+    if (current) {
+        sf::Vector2i imageSize = current->getOriginalSize();
+        
+        // Calculer le zoom pour que l'image tienne dans la zone de travail
+        float scaleX = viewportSize.x / imageSize.x;
+        float scaleY = viewportSize.y / imageSize.y;
+        float optimalZoom = std::min(scaleX, scaleY);
+        
+        // Ajuster le zoom selon la taille de l'image
+        if (imageSize.x > 3000 || imageSize.y > 3000) {
+            // Pour les très grandes images, utiliser 80% pour avoir plus de marge
+            optimalZoom *= 0.8f;
+        } else if (imageSize.x < 800 && imageSize.y < 600) {
+            // Pour les petites images, utiliser 90% pour bien les voir
+            optimalZoom *= 0.9f;
+        } else {
+            // Pour les images moyennes, utiliser 85%
+            optimalZoom *= 0.85f;
+        }
+        
+        // S'assurer que le zoom n'est ni trop petit ni trop grand
+        optimalZoom = std::max(0.1f, std::min(2.0f, optimalZoom));
+        
+        current->setZoom(optimalZoom);
+        centerCurrentImage();
     }
 }
 
 void ImageManager::updateImagePositions() {
-    for (auto& image : images) {
-        image->setViewPosition(imageViewPosition);
-    }
+    // Cette méthode n'est plus nécessaire car chaque image garde sa position individuelle
 }
 
 sf::Vector2f ImageManager::worldToImage(const sf::Vector2f& worldPos) const {

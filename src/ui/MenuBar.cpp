@@ -18,7 +18,7 @@ void MenuBar::addMenu(const std::string& title) {
 
 void MenuBar::addMenuItem(const std::string& menuTitle, const std::string& itemLabel, std::function<void()> callback) {
     for (auto& menu : menus) {
-        if (menuTitle == "File" && menus.size() > 0 && menu == menus[0]) {
+        if (menu->getTitle() == menuTitle) {
             menu->addItem(itemLabel, callback);
             break;
         }

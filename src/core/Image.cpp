@@ -53,6 +53,17 @@ void Image::setZoom(float zoom) {
     updateSprite();
 }
 
+void Image::setZoomAt(float zoom, const sf::Vector2f& centerPoint) {
+    sf::Vector2f imageCenter = worldToImage(centerPoint);
+    setZoom(zoom);
+    
+    // Adjust position to keep the center point stable
+    sf::Vector2f newWorldCenter = imageToWorld(imageCenter);
+    sf::Vector2f offset = centerPoint - newWorldCenter;
+    viewPosition += offset;
+    updateSprite();
+}
+
 void Image::zoomIn() {
     float newZoom = zoomLevel * 1.25f;
     setZoom(newZoom);
@@ -61,6 +72,16 @@ void Image::zoomIn() {
 void Image::zoomOut() {
     float newZoom = zoomLevel * 0.8f;
     setZoom(newZoom);
+}
+
+void Image::zoomInAt(const sf::Vector2f& centerPoint) {
+    float newZoom = zoomLevel * 1.25f;
+    setZoomAt(newZoom, centerPoint);
+}
+
+void Image::zoomOutAt(const sf::Vector2f& centerPoint) {
+    float newZoom = zoomLevel * 0.8f;
+    setZoomAt(newZoom, centerPoint);
 }
 
 void Image::resetZoom() {
