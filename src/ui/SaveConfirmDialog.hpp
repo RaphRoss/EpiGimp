@@ -14,7 +14,6 @@ public:
     void draw(sf::RenderWindow& window);
     void handleEvent(const sf::Event& event);
     
-    // Callbacks
     void setOnSave(std::function<void()> callback) { onSave = callback; }
     void setOnDontSave(std::function<void()> callback) { onDontSave = callback; }
     void setOnCancel(std::function<void()> callback) { onCancel = callback; }
@@ -26,13 +25,11 @@ private:
     bool visible = false;
     std::string currentImageName;
     
-    // Interface
     sf::RectangleShape overlay;
     sf::RectangleShape dialogBox;
     sf::Text titleText;
     sf::Text messageText;
     
-    // Boutons
     sf::RectangleShape saveButton;
     sf::Text saveButtonText;
     sf::RectangleShape dontSaveButton;
@@ -40,7 +37,6 @@ private:
     sf::RectangleShape cancelButton;
     sf::Text cancelButtonText;
     
-    // Callbacks
     std::function<void()> onSave;
     std::function<void()> onDontSave;
     std::function<void()> onCancel;
@@ -48,7 +44,6 @@ private:
     static sf::Font font;
     static bool fontLoaded;
     
-    // Dimensions
     static const float DIALOG_WIDTH;
     static const float DIALOG_HEIGHT;
     static const float BUTTON_WIDTH;

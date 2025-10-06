@@ -17,14 +17,12 @@ StatusBar::StatusBar(float windowWidth) {
         }
     }
     
-    // Background
     background.setSize({windowWidth, STATUS_BAR_HEIGHT});
-    background.setPosition(0, 1080 - STATUS_BAR_HEIGHT); // Bottom of window
+    background.setPosition(0, 1080 - STATUS_BAR_HEIGHT);
     background.setFillColor(sf::Color(37, 37, 38));
     background.setOutlineColor(sf::Color(63, 63, 70));
     background.setOutlineThickness(1);
     
-    // Initialize texts
     if (fontLoaded) {
         mouseText.setFont(font);
         zoomText.setFont(font);

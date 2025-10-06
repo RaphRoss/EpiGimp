@@ -44,7 +44,6 @@ void Application::setupMenus() {
         imageManager.closeCurrentImage();
     });
     
-    // Add View menu
     menuBar.addMenu("View");
     
     menuBar.addMenuItem("View", "Toggle Grid", [this]() {
@@ -148,7 +147,6 @@ void Application::handleZoom(const sf::Event& event) {
                 imageManager.zoomOutAt(pos);
             }
             
-            // Update status bar with new zoom level
             Image* currentImage = imageManager.getCurrentImage();
             if (currentImage) {
                 statusBar.updateZoomLevel(currentImage->getZoom());
@@ -397,16 +395,12 @@ std::string Application::saveFileDialog() {
 void Application::updateStatusBar(const sf::Vector2f& mousePos) {
     Image* currentImage = imageManager.getCurrentImage();
     if (currentImage) {
-        // Update mouse position in image coordinates
         if (imageManager.isPositionInCurrentImage(mousePos)) {
             sf::Vector2f imagePos = currentImage->worldToImage(mousePos);
             statusBar.updateMousePosition(imagePos, currentImage->getZoom());
         }
-        
-        // Update zoom level
         statusBar.updateZoomLevel(currentImage->getZoom());
         
-        // Update image info
         sf::Vector2i size = currentImage->getOriginalSize();
         statusBar.updateImageInfo(currentImage->getName(), size.x, size.y);
     }

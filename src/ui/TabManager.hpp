@@ -23,7 +23,6 @@ public:
     size_t getTabCount() const { return tabs.size(); }
     bool hasModifiedTabs() const;
     
-    // Callbacks
     void setOnTabSelected(std::function<void(size_t)> callback) { onTabSelected = callback; }
     void setOnTabCloseRequested(std::function<void(size_t)> callback) { onTabCloseRequested = callback; }
     
@@ -40,7 +39,6 @@ private:
     std::function<void(size_t)> onTabSelected;
     std::function<void(size_t)> onTabCloseRequested;
     
-    // Pour gérer le survol
     int hoveredTabIndex = -1;
     bool hoveredCloseButton = false;
 };

@@ -14,7 +14,7 @@ public:
 
 private:
     bool isVisible = false;
-    float gridSize = 20.0f; // pixels
+    float gridSize = 20.0f;
     sf::Color gridColor = sf::Color(128, 128, 128, 100);
     std::vector<sf::Vertex> gridLines;
     

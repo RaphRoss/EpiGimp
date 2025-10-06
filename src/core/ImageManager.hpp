@@ -16,8 +16,8 @@ public:
     void openImage(const std::string& filepath);
     void closeImage(size_t index);
     void closeCurrentImage();
-    void requestCloseImage(size_t index); // Nouvelle méthode pour fermeture avec confirmation
-    void forceCloseImage(size_t index); // Fermeture sans confirmation
+    void requestCloseImage(size_t index);
+    void forceCloseImage(size_t index);
     
     void setActiveImage(size_t index);
     void nextImage();
@@ -50,30 +50,25 @@ public:
     
     bool isPositionInCurrentImage(const sf::Vector2f& worldPos) const;
     
-    // Gestion des onglets
     bool handleTabClick(const sf::Vector2f& mousePos);
     void handleTabMouseMove(const sf::Vector2f& mousePos);
     void handleSaveDialogEvent(const sf::Event& event);
     
-    // Callbacks pour la sauvegarde
     void setOnSaveRequest(std::function<void(size_t)> callback) { onSaveRequest = callback; }
     void setOnSaveAsRequest(std::function<void(size_t)> callback) { onSaveAsRequest = callback; }
     
-    // Notifications de modifications
     void notifyImageModified(size_t imageIndex);
     
 private:
     std::vector<std::unique_ptr<Image>> images;
     size_t currentImageIndex = 0;
     sf::Vector2f viewportSize = {1720, 1050};
-    sf::Vector2f imageViewPosition = {220, 82}; // Ajusté pour les onglets
+    sf::Vector2f imageViewPosition = {220, 82};
     
-    // Système d'onglets
     TabManager tabManager;
     SaveConfirmDialog saveConfirmDialog;
     size_t pendingCloseIndex = SIZE_MAX;
     
-    // Callbacks
     std::function<void(size_t)> onSaveRequest;
     std::function<void(size_t)> onSaveAsRequest;
     
