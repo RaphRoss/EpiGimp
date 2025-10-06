@@ -22,6 +22,7 @@ private:
     void setupMenus();
     void setupToolPanel();
     void setupImageManagerCallbacks();
+    void setupToolCallbacks();
     void handleImageInput(const sf::Event& event);
     void handleZoom(const sf::Event& event);
     void updateStatusBar(const sf::Vector2f& mousePos);
@@ -29,6 +30,10 @@ private:
     void toggleRulers();
     void centerImage();
     void fitImageToView();
+    void undo();
+    void redo();
+    void selectAll();
+    void deselectAll();
     void saveFile();
     void saveAsFile();
     void openFile();

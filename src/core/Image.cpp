@@ -46,6 +46,8 @@ void Image::draw(sf::RenderWindow& window, const sf::Vector2f& position) {
     viewPosition = position;
     updateSprite();
     window.draw(sprite);
+    
+    selection.draw(window, viewPosition, zoomLevel);
 }
 
 void Image::setZoom(float zoom) {

@@ -1,5 +1,6 @@
 #include "Application.hpp"
 #include "../tools/ToolFactory.hpp"
+#include "../tools/SelectTool.hpp"
 #include <cstdio>
 #include <string>
 
@@ -11,6 +12,7 @@ Application::Application(int width, int height, const std::string& title)
     setupMenus();
     setupToolPanel();
     setupImageManagerCallbacks();
+    setupToolCallbacks();
     newImageDialog.setOnConfirm([this](int width, int height, const std::string& name) {
         std::string finalName = name;
         if (finalName.empty() || finalName == "Untitled") {
@@ -19,6 +21,8 @@ Application::Application(int width, int height, const std::string& title)
         }
         imageManager.createNewImage(width, height, finalName);
     });
+    
+    currentTool = ToolFactory::createTool("select");
 }
 
 void Application::setupMenus() {
@@ -44,6 +48,26 @@ void Application::setupMenus() {
         imageManager.closeCurrentImage();
     });
     
+    menuBar.addMenu("Edit");
+    
+    menuBar.addMenuItem("Edit", "Undo", [this]() {
+        undo();
+    });
+    
+    menuBar.addMenuItem("Edit", "Redo", [this]() {
+        redo();
+    });
+    
+    menuBar.addMenu("Select");
+    
+    menuBar.addMenuItem("Select", "Select All", [this]() {
+        selectAll();
+    });
+    
+    menuBar.addMenuItem("Select", "Deselect All", [this]() {
+        deselectAll();
+    });
+    
     menuBar.addMenu("View");
     
     menuBar.addMenuItem("View", "Toggle Grid", [this]() {
@@ -64,20 +88,40 @@ void Application::setupMenus() {
 }
 
 void Application::setupToolPanel() {
+    toolPanel.addTool("select", "Select", [this]() {
+        currentTool = ToolFactory::createTool("select");
+        currentToolName = "Select";
+        statusBar.updateToolInfo(currentToolName);
+        setupToolCallbacks();
+    });
+    
     toolPanel.addTool("pencil", "Pencil", [this]() {
         currentTool = ToolFactory::createTool("pencil");
         currentToolName = "Pencil";
         statusBar.updateToolInfo(currentToolName);
+        setupToolCallbacks();
     });
     
     toolPanel.addTool("pan", "Pan", [this]() {
         currentTool = ToolFactory::createTool("pan");
         currentToolName = "Pan";
         statusBar.updateToolInfo(currentToolName);
+        setupToolCallbacks();
     });
     
-    toolPanel.setSelectedTool("pencil");
-    statusBar.updateToolInfo("Pencil");
+    toolPanel.setSelectedTool("select");
+    statusBar.updateToolInfo("Select");
+}
+
+void Application::setupToolCallbacks() {
+    if (auto selectTool = dynamic_cast<SelectTool*>(currentTool.get())) {
+        selectTool->setOnSelectionChanged([this](const Selection& selection) {
+            Image* currentImage = imageManager.getCurrentImage();
+            if (currentImage) {
+                currentImage->setSelection(selection);
+            }
+        });
+    }
 }
 
 void Application::setupImageManagerCallbacks() {
@@ -172,6 +216,14 @@ void Application::processEvents() {
                 newImage();
             } else if (event.key.control && event.key.code == sf::Keyboard::O) {
                 openFile();
+            } else if (event.key.control && event.key.code == sf::Keyboard::Z) {
+                if (imageManager.getCurrentImage()) {
+                    imageManager.getCurrentImage()->getHistoryManager().undo();
+                }
+            } else if (event.key.control && event.key.code == sf::Keyboard::Y) {
+                if (imageManager.getCurrentImage()) {
+                    imageManager.getCurrentImage()->getHistoryManager().redo();
+                }
             } else if (event.key.code == sf::Keyboard::Add || event.key.code == sf::Keyboard::Equal) {
                 imageManager.zoomIn();
             } else if (event.key.code == sf::Keyboard::Subtract || event.key.code == sf::Keyboard::Hyphen) {
@@ -192,12 +244,20 @@ void Application::processEvents() {
                 fitImageToView();
             } else if (event.key.control && event.key.code == sf::Keyboard::W) {
                 imageManager.closeCurrentImage();
+            } else if (event.key.control && event.key.code == sf::Keyboard::Z) {
+                undo();
+            } else if (event.key.control && event.key.code == sf::Keyboard::Y) {
+                redo();
+            } else if (event.key.control && event.key.code == sf::Keyboard::A) {
+                selectAll();
+            } else if (event.key.control && event.key.shift && event.key.code == sf::Keyboard::A) {
+                deselectAll();
             }
         }
         
         if (event.type == sf::Event::KeyReleased) {
             if (event.key.code == sf::Keyboard::Space) {
-                currentTool = ToolFactory::createTool("pencil");
+                currentTool = ToolFactory::createTool("select");
             }
         }
 
@@ -267,12 +327,13 @@ void Application::render() {
     }
     
     toolPanel.draw(window);
-    menuBar.draw(window);
     
     imageManager.drawTabs(window);
     
     statusBar.draw(window);
     newImageDialog.draw(window);
+    
+    menuBar.draw(window);
     
     imageManager.drawSaveDialog(window);
     
@@ -420,4 +481,35 @@ void Application::centerImage() {
 
 void Application::fitImageToView() {
     imageManager.fitCurrentImageToView();
+}
+
+void Application::undo() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        currentImage->getHistoryManager().undo();
+    }
+}
+
+void Application::redo() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        currentImage->getHistoryManager().redo();
+    }
+}
+
+void Application::selectAll() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        sf::Vector2i size = currentImage->getOriginalSize();
+        Selection fullSelection;
+        fullSelection.setRectangle(sf::FloatRect(0, 0, static_cast<float>(size.x), static_cast<float>(size.y)));
+        currentImage->setSelection(fullSelection);
+    }
+}
+
+void Application::deselectAll() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        currentImage->clearSelection();
+    }
 }

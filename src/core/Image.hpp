@@ -1,5 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Selection.hpp"
+#include "HistoryManager.hpp"
 #include <string>
 
 class Image {
@@ -33,6 +35,14 @@ public:
     bool getModified() const { return isModified; }
     void setFilePath(const std::string& path) { filePath = path; }
     std::string getFilePath() const { return filePath; }
+    
+    Selection& getSelection() { return selection; }
+    const Selection& getSelection() const { return selection; }
+    void setSelection(const Selection& newSelection) { selection = newSelection; }
+    void clearSelection() { selection.clear(); }
+    
+    HistoryManager& getHistoryManager() { return historyManager; }
+    const HistoryManager& getHistoryManager() const { return historyManager; }
 
 private:
     sf::RenderTexture renderTexture;
@@ -43,6 +53,8 @@ private:
     sf::Vector2f viewPosition = {220, 50};
     bool isModified = false;
     std::string filePath = "";
+    Selection selection;
+    HistoryManager historyManager;
     void updateSprite();
     void setupTexture();
 };
