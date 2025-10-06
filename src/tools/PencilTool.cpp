@@ -23,5 +23,6 @@ void PencilTool::onMouseMoved(const sf::Vector2f& pos, Image* image) {
     auto& texture = image->getTexture();
     texture.draw(line, 2, sf::Lines);
     texture.display();
+    image->markAsModified();
     lastPos = imagePos;
 }

@@ -7,11 +7,17 @@ Application::Application(int width, int height, const std::string& title)
     : window(sf::VideoMode(width, height), title), statusBar(static_cast<float>(width)) {
     window.setFramerateLimit(60);
     currentTool = ToolFactory::createTool("pencil");
-    imageManager.setViewportSize({static_cast<float>(width - 220), static_cast<float>(height - 50)});
+    imageManager.setViewportSize({static_cast<float>(width - 220), static_cast<float>(height - 82)});
     setupMenus();
     setupToolPanel();
+    setupImageManagerCallbacks();
     newImageDialog.setOnConfirm([this](int width, int height, const std::string& name) {
-        imageManager.createNewImage(width, height, name);
+        std::string finalName = name;
+        if (finalName.empty() || finalName == "Untitled") {
+            static int untitledCounter = 1;
+            finalName = "Untitled-" + std::to_string(untitledCounter++);
+        }
+        imageManager.createNewImage(width, height, finalName);
     });
 }
 
@@ -32,6 +38,10 @@ void Application::setupMenus() {
     
     menuBar.addMenuItem("File", "Save As", [this]() {
         saveAsFile();
+    });
+    
+    menuBar.addMenuItem("File", "Close Tab", [this]() {
+        imageManager.closeCurrentImage();
     });
     
     // Add View menu
@@ -69,6 +79,37 @@ void Application::setupToolPanel() {
     
     toolPanel.setSelectedTool("pencil");
     statusBar.updateToolInfo("Pencil");
+}
+
+void Application::setupImageManagerCallbacks() {
+    imageManager.setOnSaveRequest([this](size_t imageIndex) {
+        Image* image = imageManager.getImage(imageIndex);
+        if (image) {
+            if (image->getFilePath().empty()) {
+                std::string filePath = saveFileDialog();
+                if (!filePath.empty()) {
+                    image->saveToFile(filePath);
+                    imageManager.notifyImageModified(imageIndex);
+                    imageManager.forceCloseImage(imageIndex);
+                }
+            } else {
+                image->saveToFile(image->getFilePath());
+                imageManager.notifyImageModified(imageIndex);
+                imageManager.forceCloseImage(imageIndex);
+            }
+        }
+    });
+    
+    imageManager.setOnSaveAsRequest([this](size_t imageIndex) {
+        Image* image = imageManager.getImage(imageIndex);
+        if (image) {
+            std::string filePath = saveFileDialog();
+            if (!filePath.empty()) {
+                image->saveToFile(filePath);
+                imageManager.notifyImageModified(imageIndex);
+            }
+        }
+    });
 }
 
 void Application::handleImageInput(const sf::Event& event) {
@@ -123,6 +164,8 @@ void Application::processEvents() {
             window.close();
         }
 
+        imageManager.handleSaveDialogEvent(event);
+        
         newImageDialog.handleEvent(event);
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.control && event.key.code == sf::Keyboard::S) {
@@ -144,20 +187,18 @@ void Application::processEvents() {
             } else if (event.key.code == sf::Keyboard::R && event.key.control) {
                 toggleRulers();
             } else if (event.key.code == sf::Keyboard::Space) {
-                // Temporary pan tool with spacebar
                 currentTool = ToolFactory::createTool("pan");
             } else if (event.key.code == sf::Keyboard::H) {
-                // Center image (H like "Home")
                 centerImage();
             } else if (event.key.code == sf::Keyboard::F) {
-                // Fit image to view
                 fitImageToView();
+            } else if (event.key.control && event.key.code == sf::Keyboard::W) {
+                imageManager.closeCurrentImage();
             }
         }
         
         if (event.type == sf::Event::KeyReleased) {
             if (event.key.code == sf::Keyboard::Space) {
-                // Return to previous tool
                 currentTool = ToolFactory::createTool("pencil");
             }
         }
@@ -172,7 +213,12 @@ void Application::processEvents() {
             if (!newImageDialog.isVisible()) {
                 bool menuHandled = menuBar.handleClick(pos);
                 
-                if (!menuHandled && pos.y > 30) {
+                bool tabHandled = false;
+                if (!menuHandled && pos.y >= 30 && pos.y <= 62) {
+                    tabHandled = imageManager.handleTabClick(pos);
+                }
+                
+                if (!menuHandled && !tabHandled && pos.y > 62) {
                     toolPanel.handleClick(pos);
                 }
             }
@@ -184,6 +230,7 @@ void Application::processEvents() {
             
             if (!newImageDialog.isVisible()) {
                 menuBar.handleMouseMove(pos);
+                imageManager.handleTabMouseMove(pos);
                 updateStatusBar(pos);
             }
         }
@@ -206,26 +253,30 @@ void Application::render() {
         sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
         sf::Vector2f mousePos = window.mapPixelToCoords(mousePixelPos);
         
-        // Draw rulers first (behind image)
         if (rulers.getVisible()) {
             rulers.draw(window, imagePos, imageSize, zoom, mousePos);
         }
         
-        // Draw image
         imageManager.draw(window);
         
-        // Draw grid on top of image
         if (grid.getVisible()) {
             grid.draw(window, imagePos, imageSize, zoom);
         }
+        
+        imageManager.notifyImageModified(imageManager.getCurrentImageIndex());
     } else {
         imageManager.draw(window);
     }
     
     toolPanel.draw(window);
     menuBar.draw(window);
+    
+    imageManager.drawTabs(window);
+    
     statusBar.draw(window);
     newImageDialog.draw(window);
+    
+    imageManager.drawSaveDialog(window);
     
     window.display();
 }
@@ -241,11 +292,16 @@ void Application::saveFile() {
     Image* currentImage = imageManager.getCurrentImage();
     if (!currentImage) return;
     
-    if (currentFilePath.empty()) {
-        currentFilePath = saveFileDialog();
-        if (currentFilePath.empty()) return;
+    if (currentImage->getFilePath().empty()) {
+        std::string filePath = saveFileDialog();
+        if (!filePath.empty()) {
+            currentImage->saveToFile(filePath);
+            imageManager.notifyImageModified(imageManager.getCurrentImageIndex());
+        }
+    } else {
+        currentImage->saveToFile(currentImage->getFilePath());
+        imageManager.notifyImageModified(imageManager.getCurrentImageIndex());
     }
-    currentImage->saveToFile(currentFilePath);
 }
 
 void Application::saveAsFile() {
@@ -255,7 +311,7 @@ void Application::saveAsFile() {
     std::string filePath = saveFileDialog();
     if (!filePath.empty()) {
         currentImage->saveToFile(filePath);
-        currentFilePath = filePath;
+        imageManager.notifyImageModified(imageManager.getCurrentImageIndex());
     }
 }
 
@@ -263,7 +319,6 @@ void Application::openFile() {
     std::string filePath = openFileDialog();
     if (!filePath.empty()) {
         imageManager.openImage(filePath);
-        currentFilePath = filePath;
     }
 }
 

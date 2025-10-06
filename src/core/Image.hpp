@@ -27,6 +27,12 @@ public:
     sf::FloatRect getBounds() const;
     sf::Vector2f worldToImage(const sf::Vector2f& worldPos) const;
     sf::Vector2f imageToWorld(const sf::Vector2f& imagePos) const;
+    
+    void markAsModified() { isModified = true; }
+    void markAsSaved() { isModified = false; }
+    bool getModified() const { return isModified; }
+    void setFilePath(const std::string& path) { filePath = path; }
+    std::string getFilePath() const { return filePath; }
 
 private:
     sf::RenderTexture renderTexture;
@@ -35,6 +41,8 @@ private:
     float zoomLevel = 1.0f;
     std::string imageName;
     sf::Vector2f viewPosition = {220, 50};
+    bool isModified = false;
+    std::string filePath = "";
     void updateSprite();
     void setupTexture();
 };

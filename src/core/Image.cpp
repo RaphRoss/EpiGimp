@@ -101,6 +101,8 @@ void Image::saveToFile(const std::string& filename) {
     sf::Image screenshot = tex.copyToImage();
     if (screenshot.saveToFile(filename)) {
         std::cout << "Image sauvegardée : " << filename << std::endl;
+        filePath = filename;
+        markAsSaved();
     } else {
         std::cerr << "Erreur lors de la sauvegarde de " << filename << std::endl;
     }

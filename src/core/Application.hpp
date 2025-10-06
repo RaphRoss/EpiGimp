@@ -21,6 +21,7 @@ private:
     void render();
     void setupMenus();
     void setupToolPanel();
+    void setupImageManagerCallbacks();
     void handleImageInput(const sf::Event& event);
     void handleZoom(const sf::Event& event);
     void updateStatusBar(const sf::Vector2f& mousePos);
@@ -45,6 +46,5 @@ private:
     ToolPanel toolPanel;
     NewImageDialog newImageDialog;
     StatusBar statusBar;
-    std::string currentFilePath;
     std::string currentToolName = "pencil";
 };

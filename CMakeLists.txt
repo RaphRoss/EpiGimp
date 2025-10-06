@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
-include_directories(src src/core src/tools)
+include_directories(src src/core src/tools src/ui)
 
 add_executable(EpiGIMP ${SOURCES})
 

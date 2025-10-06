@@ -3,25 +3,61 @@
 #include <algorithm>
 
 ImageManager::ImageManager() {
+    tabManager.setOnTabSelected([this](size_t imageIndex) {
+        onTabSelected(imageIndex);
+    });
+    
+    tabManager.setOnTabCloseRequested([this](size_t tabIndex) {
+        onTabCloseRequested(tabIndex);
+    });
+    
+    saveConfirmDialog.setOnSave([this]() {
+        if (pendingCloseIndex < images.size() && onSaveRequest) {
+            onSaveRequest(pendingCloseIndex);
+        }
+    });
+    
+    saveConfirmDialog.setOnDontSave([this]() {
+        if (pendingCloseIndex < images.size()) {
+            forceCloseImage(pendingCloseIndex);
+        }
+        pendingCloseIndex = SIZE_MAX;
+    });
+    
+    saveConfirmDialog.setOnCancel([this]() {
+        pendingCloseIndex = SIZE_MAX;
+    });
 }
 
 void ImageManager::createNewImage(int width, int height, const std::string& name) {
     auto newImage = std::make_unique<Image>(width, height, name);
     images.push_back(std::move(newImage));
     currentImageIndex = images.size() - 1;
-    fitCurrentImageToView(); // Ajuster automatiquement à la vue
+    
+    tabManager.addTab(name, currentImageIndex);
+    
+    fitCurrentImageToView();
     std::cout << "Nouvelle image créée: " << name << " (" << width << "x" << height << ")" << std::endl;
 }
 
 void ImageManager::openImage(const std::string& filepath) {
     auto newImage = std::make_unique<Image>(filepath);
+    std::string imageName = filepath.substr(filepath.find_last_of("/\\") + 1);
+    newImage->setFilePath(filepath);
+    
     images.push_back(std::move(newImage));
     currentImageIndex = images.size() - 1;
-    fitCurrentImageToView(); // Ajuster automatiquement à la vue
+    
+    tabManager.addTab(imageName, currentImageIndex);
+    
+    fitCurrentImageToView();
 }
 
 void ImageManager::closeImage(size_t index) {
     if (index >= images.size()) return;
+    
+    tabManager.removeTab(index);
+    
     images.erase(images.begin() + index);
     if (images.empty()) {
         currentImageIndex = 0;
@@ -31,15 +67,31 @@ void ImageManager::closeImage(size_t index) {
     updateImagePositions();
 }
 
+void ImageManager::requestCloseImage(size_t index) {
+    if (index >= images.size()) return;
+    
+    if (images[index]->getModified()) {
+        pendingCloseIndex = index;
+        saveConfirmDialog.show(images[index]->getName());
+    } else {
+        forceCloseImage(index);
+    }
+}
+
+void ImageManager::forceCloseImage(size_t index) {
+    closeImage(index);
+}
+
 void ImageManager::closeCurrentImage() {
     if (!images.empty()) {
-        closeImage(currentImageIndex);
+        requestCloseImage(currentImageIndex);
     }
 }
 
 void ImageManager::setActiveImage(size_t index) {
     if (index < images.size()) {
         currentImageIndex = index;
+        tabManager.setActiveTab(index);
         centerCurrentImage();
     }
 }
@@ -209,4 +261,46 @@ bool ImageManager::isPositionInCurrentImage(const sf::Vector2f& worldPos) const 
         return current->getBounds().contains(worldPos);
     }
     return false;
+}
+
+void ImageManager::drawTabs(sf::RenderWindow& window) {
+    tabManager.draw(window);
+}
+
+void ImageManager::drawSaveDialog(sf::RenderWindow& window) {
+    saveConfirmDialog.draw(window);
+}
+
+bool ImageManager::handleTabClick(const sf::Vector2f& mousePos) {
+    return tabManager.handleClick(mousePos);
+}
+
+void ImageManager::handleTabMouseMove(const sf::Vector2f& mousePos) {
+    tabManager.handleMouseMove(mousePos);
+}
+
+void ImageManager::handleSaveDialogEvent(const sf::Event& event) {
+    saveConfirmDialog.handleEvent(event);
+}
+
+void ImageManager::notifyImageModified(size_t imageIndex) {
+    if (imageIndex < images.size()) {
+        tabManager.setTabModified(imageIndex, images[imageIndex]->getModified());
+    }
+}
+
+void ImageManager::onTabSelected(size_t imageIndex) {
+    for (size_t i = 0; i < images.size(); ++i) {
+        if (i == imageIndex) {
+            currentImageIndex = i;
+            centerCurrentImage();
+            break;
+        }
+    }
+}
+
+void ImageManager::onTabCloseRequested(size_t tabIndex) {
+    if (tabIndex < images.size()) {
+        requestCloseImage(tabIndex);
+    }
 }
