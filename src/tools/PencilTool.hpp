@@ -13,8 +13,20 @@ public:
     void onMouseReleased(const sf::Vector2f& pos, Image* image) override;
     void onMouseMoved(const sf::Vector2f& pos, Image* image) override;
 
+    void setBrushSize(float size) { brushSize = size; }
+    void setBrushColor(const sf::Color& color) { brushColor = color; }
+    void setBrushOpacity(float opacity) { brushOpacity = opacity; }
+
 private:
+    void drawBrushStroke(const sf::Vector2f& position, sf::RenderTexture& texture);
+    void drawSmoothLine(const sf::Vector2f& start, const sf::Vector2f& end, sf::RenderTexture& texture);
+    sf::Color blendColors(const sf::Color& base, const sf::Color& overlay, float alpha);
+    
     bool drawing = false;
     std::optional<sf::Vector2f> lastPos;
     std::unique_ptr<StrokeCommand> currentStroke;
+    
+    float brushSize = 5.0f;
+    sf::Color brushColor = sf::Color::Black;
+    float brushOpacity = 1.0f;
 };

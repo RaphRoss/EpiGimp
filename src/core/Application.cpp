@@ -22,7 +22,8 @@ Application::Application(int width, int height, const std::string& title)
         imageManager.createNewImage(width, height, finalName);
     });
     
-    currentTool = ToolFactory::createTool("select");
+    currentToolName = "Pencil";
+    statusBar.updateToolInfo(currentToolName);
 }
 
 void Application::setupMenus() {
@@ -109,7 +110,7 @@ void Application::setupToolPanel() {
         setupToolCallbacks();
     });
     
-    toolPanel.setSelectedTool("select");
+    toolPanel.setSelectedTool("pencil");
     statusBar.updateToolInfo("Select");
 }
 

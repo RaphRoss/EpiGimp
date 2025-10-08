@@ -81,13 +81,37 @@ void StrokeCommand::execute() {
     if (!targetImage || points.empty()) return;
     
     auto& texture = targetImage->getTexture();
+    sf::RenderStates states;
+    states.blendMode = sf::BlendAlpha;
+    
+    for (const auto& point : points) {
+        sf::CircleShape brush(2.5f);
+        brush.setFillColor(point.second);
+        brush.setPosition(point.first.x - 2.5f, point.first.y - 2.5f);
+        texture.draw(brush, states);
+    }
     
     for (size_t i = 1; i < points.size(); ++i) {
-        sf::Vertex line[] = {
-            sf::Vertex(points[i-1].first, points[i-1].second),
-            sf::Vertex(points[i].first, points[i].second)
-        };
-        texture.draw(line, 2, sf::Lines);
+        sf::Vector2f start = points[i-1].first;
+        sf::Vector2f end = points[i].first;
+        sf::Color color = points[i].second;
+        
+        float dx = end.x - start.x;
+        float dy = end.y - start.y;
+        float distance = std::sqrt(dx * dx + dy * dy);
+        
+        if (distance > 1.0f) {
+            int steps = static_cast<int>(distance);
+            for (int j = 0; j <= steps; ++j) {
+                float t = static_cast<float>(j) / steps;
+                sf::Vector2f point(start.x + t * dx, start.y + t * dy);
+                
+                sf::CircleShape brush(2.5f);
+                brush.setFillColor(color);
+                brush.setPosition(point.x - 2.5f, point.y - 2.5f);
+                texture.draw(brush, states);
+            }
+        }
     }
     texture.display();
 }
