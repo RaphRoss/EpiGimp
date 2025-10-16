@@ -567,43 +567,78 @@ void Application::deselectAll() {
 void Application::flipHorizontal() {
     Image* currentImage = imageManager.getCurrentImage();
     if (currentImage) {
-        auto command = std::make_unique<FlipCommand>(currentImage, FlipCommand::HORIZONTAL);
-        currentImage->getHistoryManager().executeCommand(std::move(command));
+        if (!currentImage->getSelection().isEmpty()) {
+            sf::FloatRect b = currentImage->getSelection().getBounds();
+            sf::IntRect r(static_cast<int>(b.left), static_cast<int>(b.top), static_cast<int>(b.width), static_cast<int>(b.height));
+            auto command = std::make_unique<FlipSelectionCommand>(currentImage, FlipCommand::HORIZONTAL, r);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+        } else {
+            auto command = std::make_unique<FlipCommand>(currentImage, FlipCommand::HORIZONTAL);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+        }
     }
 }
 
 void Application::flipVertical() {
     Image* currentImage = imageManager.getCurrentImage();
     if (currentImage) {
-        auto command = std::make_unique<FlipCommand>(currentImage, FlipCommand::VERTICAL);
-        currentImage->getHistoryManager().executeCommand(std::move(command));
+        if (!currentImage->getSelection().isEmpty()) {
+            sf::FloatRect b = currentImage->getSelection().getBounds();
+            sf::IntRect r(static_cast<int>(b.left), static_cast<int>(b.top), static_cast<int>(b.width), static_cast<int>(b.height));
+            auto command = std::make_unique<FlipSelectionCommand>(currentImage, FlipCommand::VERTICAL, r);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+        } else {
+            auto command = std::make_unique<FlipCommand>(currentImage, FlipCommand::VERTICAL);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+        }
     }
 }
 
 void Application::rotate90() {
     Image* currentImage = imageManager.getCurrentImage();
     if (currentImage) {
-        auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_90);
-        currentImage->getHistoryManager().executeCommand(std::move(command));
-        imageManager.fitCurrentImageToView();
+        if (!currentImage->getSelection().isEmpty()) {
+            sf::FloatRect b = currentImage->getSelection().getBounds();
+            sf::IntRect r(static_cast<int>(b.left), static_cast<int>(b.top), static_cast<int>(b.width), static_cast<int>(b.height));
+            auto command = std::make_unique<RotateSelectionCommand>(currentImage, RotateCommand::ROTATE_90, r);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+        } else {
+            auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_90);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+            imageManager.fitCurrentImageToView();
+        }
     }
 }
 
 void Application::rotate180() {
     Image* currentImage = imageManager.getCurrentImage();
     if (currentImage) {
-        auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_180);
-        currentImage->getHistoryManager().executeCommand(std::move(command));
-        imageManager.centerCurrentImage();
+        if (!currentImage->getSelection().isEmpty()) {
+            sf::FloatRect b = currentImage->getSelection().getBounds();
+            sf::IntRect r(static_cast<int>(b.left), static_cast<int>(b.top), static_cast<int>(b.width), static_cast<int>(b.height));
+            auto command = std::make_unique<RotateSelectionCommand>(currentImage, RotateCommand::ROTATE_180, r);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+        } else {
+            auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_180);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+            imageManager.centerCurrentImage();
+        }
     }
 }
 
 void Application::rotate270() {
     Image* currentImage = imageManager.getCurrentImage();
     if (currentImage) {
-        auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_270);
-        currentImage->getHistoryManager().executeCommand(std::move(command));
-        imageManager.fitCurrentImageToView();
+        if (!currentImage->getSelection().isEmpty()) {
+            sf::FloatRect b = currentImage->getSelection().getBounds();
+            sf::IntRect r(static_cast<int>(b.left), static_cast<int>(b.top), static_cast<int>(b.width), static_cast<int>(b.height));
+            auto command = std::make_unique<RotateSelectionCommand>(currentImage, RotateCommand::ROTATE_270, r);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+        } else {
+            auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_270);
+            currentImage->getHistoryManager().executeCommand(std::move(command));
+            imageManager.fitCurrentImageToView();
+        }
     }
 }
 

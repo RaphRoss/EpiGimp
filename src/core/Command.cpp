@@ -355,3 +355,172 @@ void ApplyImageCommand::undo() {
 std::unique_ptr<Command> ApplyImageCommand::clone() const {
     return std::make_unique<ApplyImageCommand>(targetImage, before, after);
 }
+
+FlipSelectionCommand::FlipSelectionCommand(Image* image, FlipCommand::FlipType type, const sf::IntRect& rect)
+    : targetImage(image), flipType(type), selectionRect(rect) {}
+
+void FlipSelectionCommand::execute() {
+    if (!targetImage) return;
+    sf::Image full = targetImage->getImageData();
+    backupImage = full;
+    int w = selectionRect.width;
+    int h = selectionRect.height;
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            int sx = selectionRect.left + x;
+            int sy = selectionRect.top + y;
+            int dx = flipType == FlipCommand::HORIZONTAL ? selectionRect.left + (w - 1 - x) : sx;
+            int dy = flipType == FlipCommand::VERTICAL ? selectionRect.top + (h - 1 - y) : sy;
+            if (sx >= 0 && sy >= 0 && dx >= 0 && dy >= 0 &&
+                sx < static_cast<int>(full.getSize().x) && sy < static_cast<int>(full.getSize().y) &&
+                dx < static_cast<int>(full.getSize().x) && dy < static_cast<int>(full.getSize().y)) {
+                full.setPixel(dx, dy, backupImage.getPixel(sx, sy));
+            }
+        }
+    }
+    targetImage->setImageContent(full);
+    targetImage->markAsModified();
+}
+
+void FlipSelectionCommand::undo() {
+    if (!targetImage) return;
+    sf::Texture bt;
+    bt.loadFromImage(backupImage);
+    sf::Sprite spr(bt);
+    auto& tex = targetImage->getTexture();
+    tex.clear(sf::Color::Transparent);
+    tex.draw(spr);
+    tex.display();
+}
+
+std::unique_ptr<Command> FlipSelectionCommand::clone() const {
+    return std::make_unique<FlipSelectionCommand>(targetImage, flipType, selectionRect);
+}
+
+RotateSelectionCommand::RotateSelectionCommand(Image* image, RotateCommand::RotationType type, const sf::IntRect& rect)
+    : targetImage(image), rotationType(type), selectionRect(rect) {}
+
+void RotateSelectionCommand::execute() {
+    if (!targetImage) return;
+    sf::Image full = targetImage->getImageData();
+    backupImage = full;
+    int w = selectionRect.width;
+    int h = selectionRect.height;
+    sf::Image temp;
+    if (rotationType == RotateCommand::ROTATE_90 || rotationType == RotateCommand::ROTATE_270) {
+        temp.create(h, w, sf::Color::Transparent);
+    } else {
+        temp.create(w, h, sf::Color::Transparent);
+    }
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            int sx = selectionRect.left + x;
+            int sy = selectionRect.top + y;
+            if (sx < 0 || sy < 0 || sx >= static_cast<int>(full.getSize().x) || sy >= static_cast<int>(full.getSize().y)) continue;
+            sf::Color px = full.getPixel(sx, sy);
+            if (rotationType == RotateCommand::ROTATE_90) {
+                temp.setPixel(h - 1 - y, x, px);
+            } else if (rotationType == RotateCommand::ROTATE_270) {
+                temp.setPixel(y, w - 1 - x, px);
+            } else {
+                temp.setPixel(w - 1 - x, h - 1 - y, px);
+            }
+        }
+    }
+    if (rotationType == RotateCommand::ROTATE_90 || rotationType == RotateCommand::ROTATE_270) {
+        for (int y = 0; y < h; ++y) {
+            for (int x = 0; x < w; ++x) {
+                int dx = selectionRect.left + x;
+                int dy = selectionRect.top + y;
+                if (dx >= 0 && dy >= 0 && dx < static_cast<int>(full.getSize().x) && dy < static_cast<int>(full.getSize().y))
+                    full.setPixel(dx, dy, sf::Color::White);
+            }
+        }
+        unsigned int th = temp.getSize().y;
+        unsigned int tw = temp.getSize().x;
+        for (unsigned int y = 0; y < th; ++y) {
+            for (unsigned int x = 0; x < tw; ++x) {
+                int dx = selectionRect.left + static_cast<int>(x);
+                int dy = selectionRect.top + static_cast<int>(y);
+                if (dx >= 0 && dy >= 0 && dx < static_cast<int>(full.getSize().x) && dy < static_cast<int>(full.getSize().y))
+                    full.setPixel(dx, dy, temp.getPixel(x, y));
+            }
+        }
+    } else {
+        for (int y = 0; y < h; ++y) {
+            for (int x = 0; x < w; ++x) {
+                int dx = selectionRect.left + x;
+                int dy = selectionRect.top + y;
+                if (dx >= 0 && dy >= 0 && dx < static_cast<int>(full.getSize().x) && dy < static_cast<int>(full.getSize().y))
+                    full.setPixel(dx, dy, temp.getPixel(x, y));
+            }
+        }
+    }
+    targetImage->setImageContent(full);
+    targetImage->markAsModified();
+    if (rotationType == RotateCommand::ROTATE_90 || rotationType == RotateCommand::ROTATE_270) {
+        Selection s;
+        s.setRectangle(sf::FloatRect(static_cast<float>(selectionRect.left),
+                                     static_cast<float>(selectionRect.top),
+                                     static_cast<float>(selectionRect.height),
+                                     static_cast<float>(selectionRect.width)));
+        targetImage->setSelection(s);
+    }
+}
+
+void RotateSelectionCommand::undo() {
+    if (!targetImage) return;
+    sf::Texture bt;
+    bt.loadFromImage(backupImage);
+    sf::Sprite spr(bt);
+    auto& tex = targetImage->getTexture();
+    tex.clear(sf::Color::Transparent);
+    tex.draw(spr);
+    tex.display();
+}
+
+std::unique_ptr<Command> RotateSelectionCommand::clone() const {
+    return std::make_unique<RotateSelectionCommand>(targetImage, rotationType, selectionRect);
+}
+
+InvertCommand::InvertCommand(Image* image) : targetImage(image), useRect(false) {}
+InvertCommand::InvertCommand(Image* image, const sf::IntRect& r) : targetImage(image), useRect(true), rect(r) {}
+
+void InvertCommand::execute() {
+    if (!targetImage) return;
+    sf::Image full = targetImage->getImageData();
+    backupImage = full;
+    int startX = 0, startY = 0, endX = static_cast<int>(full.getSize().x), endY = static_cast<int>(full.getSize().y);
+    if (useRect) {
+        startX = rect.left;
+        startY = rect.top;
+        endX = rect.left + rect.width;
+        endY = rect.top + rect.height;
+    }
+    for (int y = startY; y < endY; ++y) {
+        for (int x = startX; x < endX; ++x) {
+            if (x >= 0 && y >= 0 && x < static_cast<int>(full.getSize().x) && y < static_cast<int>(full.getSize().y)) {
+                sf::Color c = full.getPixel(x, y);
+                full.setPixel(x, y, sf::Color(255 - c.r, 255 - c.g, 255 - c.b, c.a));
+            }
+        }
+    }
+    targetImage->setImageContent(full);
+    targetImage->markAsModified();
+}
+
+void InvertCommand::undo() {
+    if (!targetImage) return;
+    sf::Texture bt;
+    bt.loadFromImage(backupImage);
+    sf::Sprite spr(bt);
+    auto& tex = targetImage->getTexture();
+    tex.clear(sf::Color::Transparent);
+    tex.draw(spr);
+    tex.display();
+}
+
+std::unique_ptr<Command> InvertCommand::clone() const {
+    if (useRect) return std::make_unique<InvertCommand>(targetImage, rect);
+    return std::make_unique<InvertCommand>(targetImage);
+}

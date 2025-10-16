@@ -120,3 +120,43 @@ private:
     sf::Image before;
     sf::Image after;
 };
+
+class FlipSelectionCommand : public Command {
+public:
+    FlipSelectionCommand(Image* image, FlipCommand::FlipType type, const sf::IntRect& rect);
+    void execute() override;
+    void undo() override;
+    std::unique_ptr<Command> clone() const override;
+private:
+    Image* targetImage;
+    FlipCommand::FlipType flipType;
+    sf::IntRect selectionRect;
+    sf::Image backupImage;
+};
+
+class RotateSelectionCommand : public Command {
+public:
+    RotateSelectionCommand(Image* image, RotateCommand::RotationType type, const sf::IntRect& rect);
+    void execute() override;
+    void undo() override;
+    std::unique_ptr<Command> clone() const override;
+private:
+    Image* targetImage;
+    RotateCommand::RotationType rotationType;
+    sf::IntRect selectionRect;
+    sf::Image backupImage;
+};
+
+class InvertCommand : public Command {
+public:
+    InvertCommand(Image* image);
+    InvertCommand(Image* image, const sf::IntRect& rect);
+    void execute() override;
+    void undo() override;
+    std::unique_ptr<Command> clone() const override;
+private:
+    Image* targetImage;
+    bool useRect = false;
+    sf::IntRect rect;
+    sf::Image backupImage;
+};
