@@ -48,6 +48,16 @@ public:
     void setImageContent(const sf::Image& newContent);
     sf::Image getImageData() const;
 
+    bool hasFloatingSelection() const { return floatingActive; }
+    bool isPointInFloating(const sf::Vector2f& imagePoint) const;
+    void beginFloatingFromSelection(bool cutSource);
+    void beginFloatingFromClipboard();
+    void moveFloatingBy(const sf::Vector2f& deltaImageSpace);
+    void commitFloating();
+    void cancelFloating();
+    bool copySelectionToClipboard();
+    bool pasteClipboardAsFloating();
+
 private:
     sf::RenderTexture renderTexture;
     sf::Sprite sprite;
@@ -61,4 +71,12 @@ private:
     HistoryManager historyManager;
     void updateSprite();
     void setupTexture();
+
+    bool floatingActive = false;
+    sf::Image floatingImage;
+    sf::Vector2f floatingOffset = {0,0};
+    sf::IntRect floatingSrcRect = {0,0,0,0};
+    bool floatingCut = false;
+
+    static sf::Image clipboard;
 };

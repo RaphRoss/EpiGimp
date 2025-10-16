@@ -125,7 +125,7 @@ std::unique_ptr<Command> StrokeCommand::clone() const {
     clone->points = points;
     clone->backupImage = backupImage;
     clone->backupSaved = backupSaved;
-    return std::move(clone);
+    return clone;
 }
 
 void StrokeCommand::saveBackup() {
@@ -336,4 +336,22 @@ void CropCommand::restoreBackup() {
     texture.clear(sf::Color::Transparent);
     texture.draw(backupSprite);
     texture.display();
+}
+
+ApplyImageCommand::ApplyImageCommand(Image* image, const sf::Image& beforeImage, const sf::Image& afterImage)
+    : targetImage(image), before(beforeImage), after(afterImage) {}
+
+void ApplyImageCommand::execute() {
+    if (!targetImage) return;
+    targetImage->setImageContent(after);
+    targetImage->markAsModified();
+}
+
+void ApplyImageCommand::undo() {
+    if (!targetImage) return;
+    targetImage->setImageContent(before);
+}
+
+std::unique_ptr<Command> ApplyImageCommand::clone() const {
+    return std::make_unique<ApplyImageCommand>(targetImage, before, after);
 }

@@ -60,6 +60,22 @@ void Application::setupMenus() {
         redo();
     });
     
+    menuBar.addMenuItem("Edit", "Copy", [this]() {
+        Image* currentImage = imageManager.getCurrentImage();
+        if (currentImage) {
+            currentImage->copySelectionToClipboard();
+        }
+    });
+    
+    menuBar.addMenuItem("Edit", "Paste", [this]() {
+        Image* currentImage = imageManager.getCurrentImage();
+        if (currentImage) {
+            if (currentImage->pasteClipboardAsFloating()) {
+                // Center pasted content near top-left for now
+            }
+        }
+    });
+    
     menuBar.addMenu("Select");
     
     menuBar.addMenuItem("Select", "Select All", [this]() {
@@ -280,6 +296,12 @@ void Application::processEvents() {
                 selectAll();
             } else if (event.key.control && event.key.shift && event.key.code == sf::Keyboard::A) {
                 deselectAll();
+            } else if (event.key.control && event.key.code == sf::Keyboard::C) {
+                Image* currentImage = imageManager.getCurrentImage();
+                if (currentImage) currentImage->copySelectionToClipboard();
+            } else if (event.key.control && event.key.code == sf::Keyboard::V) {
+                Image* currentImage = imageManager.getCurrentImage();
+                if (currentImage) currentImage->pasteClipboardAsFloating();
             }
         }
         
@@ -563,6 +585,7 @@ void Application::rotate90() {
     if (currentImage) {
         auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_90);
         currentImage->getHistoryManager().executeCommand(std::move(command));
+        imageManager.fitCurrentImageToView();
     }
 }
 
@@ -571,6 +594,7 @@ void Application::rotate180() {
     if (currentImage) {
         auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_180);
         currentImage->getHistoryManager().executeCommand(std::move(command));
+        imageManager.centerCurrentImage();
     }
 }
 
@@ -579,6 +603,7 @@ void Application::rotate270() {
     if (currentImage) {
         auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_270);
         currentImage->getHistoryManager().executeCommand(std::move(command));
+        imageManager.fitCurrentImageToView();
     }
 }
 
@@ -595,5 +620,6 @@ void Application::cropToSelection() {
         auto command = std::make_unique<CropCommand>(currentImage, cropRect);
         currentImage->getHistoryManager().executeCommand(std::move(command));
         currentImage->clearSelection();
+        imageManager.centerCurrentImage();
     }
 }

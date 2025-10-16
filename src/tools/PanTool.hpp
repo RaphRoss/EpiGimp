@@ -14,4 +14,5 @@ public:
 private:
     bool panning = false;
     std::optional<sf::Vector2f> lastMousePos;
+    bool movingFloating = false;
 };

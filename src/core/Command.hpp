@@ -106,3 +106,17 @@ private:
     void saveBackup();
     void restoreBackup();
 };
+
+class ApplyImageCommand : public Command {
+public:
+    ApplyImageCommand(Image* image, const sf::Image& beforeImage, const sf::Image& afterImage);
+
+    void execute() override;
+    void undo() override;
+    std::unique_ptr<Command> clone() const override;
+
+private:
+    Image* targetImage;
+    sf::Image before;
+    sf::Image after;
+};
