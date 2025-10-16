@@ -51,3 +51,58 @@ private:
     void saveBackup();
     void restoreBackup();
 };
+
+class FlipCommand : public Command {
+public:
+    enum FlipType { HORIZONTAL, VERTICAL };
+    FlipCommand(Image* image, FlipType type);
+    
+    void execute() override;
+    void undo() override;
+    std::unique_ptr<Command> clone() const override;
+
+private:
+    Image* targetImage;
+    FlipType flipType;
+    sf::Image backupImage;
+    
+    void saveBackup();
+    void restoreBackup();
+};
+
+class RotateCommand : public Command {
+public:
+    enum RotationType { ROTATE_90, ROTATE_180, ROTATE_270 };
+    RotateCommand(Image* image, RotationType type);
+    
+    void execute() override;
+    void undo() override;
+    std::unique_ptr<Command> clone() const override;
+
+private:
+    Image* targetImage;
+    RotationType rotationType;
+    sf::Image backupImage;
+    sf::Vector2u originalSize;
+    
+    void saveBackup();
+    void restoreBackup();
+};
+
+class CropCommand : public Command {
+public:
+    CropCommand(Image* image, const sf::IntRect& cropRect);
+    
+    void execute() override;
+    void undo() override;
+    std::unique_ptr<Command> clone() const override;
+
+private:
+    Image* targetImage;
+    sf::IntRect cropRegion;
+    sf::Image backupImage;
+    sf::Vector2u originalSize;
+    
+    void saveBackup();
+    void restoreBackup();
+};

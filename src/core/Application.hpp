@@ -38,6 +38,12 @@ private:
     void saveAsFile();
     void openFile();
     void newImage();
+    void flipHorizontal();
+    void flipVertical();
+    void rotate90();
+    void rotate180();
+    void rotate270();
+    void cropToSelection();
     std::string openFileDialog();
     std::string saveFileDialog();
 

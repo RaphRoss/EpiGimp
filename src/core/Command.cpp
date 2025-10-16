@@ -147,3 +147,193 @@ void StrokeCommand::restoreBackup() {
     texture.draw(backupSprite);
     texture.display();
 }
+
+FlipCommand::FlipCommand(Image* image, FlipType type) : targetImage(image), flipType(type) {
+    saveBackup();
+}
+
+void FlipCommand::execute() {
+    if (!targetImage) return;
+    
+    sf::Image imageData = targetImage->getImageData();
+    sf::Vector2u size = imageData.getSize();
+    sf::Image flippedImage;
+    flippedImage.create(size.x, size.y, sf::Color::Transparent);
+    
+    for (unsigned int y = 0; y < size.y; ++y) {
+        for (unsigned int x = 0; x < size.x; ++x) {
+            sf::Color pixel = imageData.getPixel(x, y);
+            if (flipType == HORIZONTAL) {
+                flippedImage.setPixel(size.x - 1 - x, y, pixel);
+            } else {
+                flippedImage.setPixel(x, size.y - 1 - y, pixel);
+            }
+        }
+    }
+    
+    targetImage->setImageContent(flippedImage);
+    targetImage->markAsModified();
+}
+
+void FlipCommand::undo() {
+    restoreBackup();
+}
+
+std::unique_ptr<Command> FlipCommand::clone() const {
+    return std::make_unique<FlipCommand>(targetImage, flipType);
+}
+
+void FlipCommand::saveBackup() {
+    if (targetImage) {
+        backupImage = targetImage->getImageData();
+    }
+}
+
+void FlipCommand::restoreBackup() {
+    if (!targetImage) return;
+    
+    sf::Texture backupTexture;
+    backupTexture.loadFromImage(backupImage);
+    sf::Sprite backupSprite(backupTexture);
+    
+    auto& texture = targetImage->getTexture();
+    texture.clear(sf::Color::Transparent);
+    texture.draw(backupSprite);
+    texture.display();
+}
+
+RotateCommand::RotateCommand(Image* image, RotationType type) : targetImage(image), rotationType(type) {
+    saveBackup();
+    if (image) {
+        originalSize = image->getTexture().getSize();
+    }
+}
+
+void RotateCommand::execute() {
+    if (!targetImage) return;
+    
+    sf::Image imageData = targetImage->getImageData();
+    sf::Vector2u size = imageData.getSize();
+    sf::Image rotatedImage;
+    
+    if (rotationType == ROTATE_90 || rotationType == ROTATE_270) {
+        rotatedImage.create(size.y, size.x, sf::Color::Transparent);
+        
+        for (unsigned int y = 0; y < size.y; ++y) {
+            for (unsigned int x = 0; x < size.x; ++x) {
+                sf::Color pixel = imageData.getPixel(x, y);
+                if (rotationType == ROTATE_90) {
+                    rotatedImage.setPixel(size.y - 1 - y, x, pixel);
+                } else {
+                    rotatedImage.setPixel(y, size.x - 1 - x, pixel);
+                }
+            }
+        }
+        
+        targetImage->setImageContent(rotatedImage);
+    } else {
+        rotatedImage.create(size.x, size.y, sf::Color::Transparent);
+        
+        for (unsigned int y = 0; y < size.y; ++y) {
+            for (unsigned int x = 0; x < size.x; ++x) {
+                sf::Color pixel = imageData.getPixel(x, y);
+                rotatedImage.setPixel(size.x - 1 - x, size.y - 1 - y, pixel);
+            }
+        }
+        
+        targetImage->setImageContent(rotatedImage);
+    }
+    
+    targetImage->markAsModified();
+}
+
+void RotateCommand::undo() {
+    if (targetImage) {
+        targetImage->resize(originalSize.x, originalSize.y);
+    }
+    restoreBackup();
+}
+
+std::unique_ptr<Command> RotateCommand::clone() const {
+    return std::make_unique<RotateCommand>(targetImage, rotationType);
+}
+
+void RotateCommand::saveBackup() {
+    if (targetImage) {
+        backupImage = targetImage->getImageData();
+    }
+}
+
+void RotateCommand::restoreBackup() {
+    if (!targetImage) return;
+    
+    sf::Texture backupTexture;
+    backupTexture.loadFromImage(backupImage);
+    sf::Sprite backupSprite(backupTexture);
+    
+    auto& texture = targetImage->getTexture();
+    texture.clear(sf::Color::Transparent);
+    texture.draw(backupSprite);
+    texture.display();
+}
+
+CropCommand::CropCommand(Image* image, const sf::IntRect& cropRect) : targetImage(image), cropRegion(cropRect) {
+    saveBackup();
+    if (image) {
+        originalSize = image->getTexture().getSize();
+    }
+}
+
+void CropCommand::execute() {
+    if (!targetImage) return;
+    
+    sf::Image imageData = targetImage->getImageData();
+    sf::Image croppedImage;
+    croppedImage.create(cropRegion.width, cropRegion.height, sf::Color::Transparent);
+    
+    for (int y = 0; y < cropRegion.height; ++y) {
+        for (int x = 0; x < cropRegion.width; ++x) {
+            int srcX = cropRegion.left + x;
+            int srcY = cropRegion.top + y;
+            
+            if (srcX >= 0 && srcX < static_cast<int>(imageData.getSize().x) &&
+                srcY >= 0 && srcY < static_cast<int>(imageData.getSize().y)) {
+                sf::Color pixel = imageData.getPixel(srcX, srcY);
+                croppedImage.setPixel(x, y, pixel);
+            }
+        }
+    }
+    
+    targetImage->setImageContent(croppedImage);
+    targetImage->markAsModified();
+}
+
+void CropCommand::undo() {
+    if (targetImage) {
+        targetImage->resize(originalSize.x, originalSize.y);
+    }
+    restoreBackup();
+}
+
+std::unique_ptr<Command> CropCommand::clone() const {
+    return std::make_unique<CropCommand>(targetImage, cropRegion);
+}
+
+void CropCommand::saveBackup() {
+    if (targetImage) {
+        backupImage = targetImage->getImageData();
+    }
+}
+
+void CropCommand::restoreBackup() {
+    if (!targetImage) return;
+    
+    sf::Texture backupTexture;
+    backupTexture.loadFromImage(backupImage);
+    sf::Sprite backupSprite(backupTexture);
+    
+    auto& texture = targetImage->getTexture();
+    texture.clear(sf::Color::Transparent);
+    texture.draw(backupSprite);
+    texture.display();
+}

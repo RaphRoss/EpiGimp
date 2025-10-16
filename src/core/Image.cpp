@@ -124,3 +124,39 @@ sf::Vector2f Image::imageToWorld(const sf::Vector2f& imagePos) const {
     return sf::Vector2f(imagePos.x * zoomLevel + viewPosition.x, 
                        imagePos.y * zoomLevel + viewPosition.y);
 }
+
+void Image::resize(unsigned int newWidth, unsigned int newHeight) {
+    sf::Image currentContent = renderTexture.getTexture().copyToImage();
+    
+    originalSize = sf::Vector2i(newWidth, newHeight);
+    renderTexture.create(newWidth, newHeight);
+    renderTexture.clear(sf::Color::Transparent);
+    
+    sf::Texture tempTexture;
+    tempTexture.loadFromImage(currentContent);
+    sf::Sprite tempSprite(tempTexture);
+    renderTexture.draw(tempSprite);
+    renderTexture.display();
+    
+    updateSprite();
+}
+
+void Image::setImageContent(const sf::Image& newContent) {
+    sf::Vector2u newSize = newContent.getSize();
+    originalSize = sf::Vector2i(newSize.x, newSize.y);
+    
+    renderTexture.create(newSize.x, newSize.y);
+    renderTexture.clear(sf::Color::Transparent);
+    
+    sf::Texture tempTexture;
+    tempTexture.loadFromImage(newContent);
+    sf::Sprite tempSprite(tempTexture);
+    renderTexture.draw(tempSprite);
+    renderTexture.display();
+    
+    updateSprite();
+}
+
+sf::Image Image::getImageData() const {
+    return renderTexture.getTexture().copyToImage();
+}

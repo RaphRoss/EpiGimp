@@ -43,6 +43,10 @@ public:
     
     HistoryManager& getHistoryManager() { return historyManager; }
     const HistoryManager& getHistoryManager() const { return historyManager; }
+    
+    void resize(unsigned int newWidth, unsigned int newHeight);
+    void setImageContent(const sf::Image& newContent);
+    sf::Image getImageData() const;
 
 private:
     sf::RenderTexture renderTexture;

@@ -1,6 +1,7 @@
 #include "Application.hpp"
 #include "../tools/ToolFactory.hpp"
 #include "../tools/SelectTool.hpp"
+#include "Command.hpp"
 #include <cstdio>
 #include <string>
 
@@ -85,6 +86,32 @@ void Application::setupMenus() {
     
     menuBar.addMenuItem("View", "Fit Image to View", [this]() {
         fitImageToView();
+    });
+    
+    menuBar.addMenu("Image");
+    
+    menuBar.addMenuItem("Image", "Flip Horizontal", [this]() {
+        flipHorizontal();
+    });
+    
+    menuBar.addMenuItem("Image", "Flip Vertical", [this]() {
+        flipVertical();
+    });
+    
+    menuBar.addMenuItem("Image", "Rotate 90", [this]() {
+        rotate90();
+    });
+    
+    menuBar.addMenuItem("Image", "Rotate 180", [this]() {
+        rotate180();
+    });
+    
+    menuBar.addMenuItem("Image", "Rotate 270", [this]() {
+        rotate270();
+    });
+    
+    menuBar.addMenuItem("Image", "Crop to Selection", [this]() {
+        cropToSelection();
     });
 }
 
@@ -511,6 +538,62 @@ void Application::selectAll() {
 void Application::deselectAll() {
     Image* currentImage = imageManager.getCurrentImage();
     if (currentImage) {
+        currentImage->clearSelection();
+    }
+}
+
+void Application::flipHorizontal() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        auto command = std::make_unique<FlipCommand>(currentImage, FlipCommand::HORIZONTAL);
+        currentImage->getHistoryManager().executeCommand(std::move(command));
+    }
+}
+
+void Application::flipVertical() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        auto command = std::make_unique<FlipCommand>(currentImage, FlipCommand::VERTICAL);
+        currentImage->getHistoryManager().executeCommand(std::move(command));
+    }
+}
+
+void Application::rotate90() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_90);
+        currentImage->getHistoryManager().executeCommand(std::move(command));
+    }
+}
+
+void Application::rotate180() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_180);
+        currentImage->getHistoryManager().executeCommand(std::move(command));
+    }
+}
+
+void Application::rotate270() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage) {
+        auto command = std::make_unique<RotateCommand>(currentImage, RotateCommand::ROTATE_270);
+        currentImage->getHistoryManager().executeCommand(std::move(command));
+    }
+}
+
+void Application::cropToSelection() {
+    Image* currentImage = imageManager.getCurrentImage();
+    if (currentImage && !currentImage->getSelection().isEmpty()) {
+        sf::FloatRect selectionBounds = currentImage->getSelection().getBounds();
+        sf::IntRect cropRect(
+            static_cast<int>(selectionBounds.left),
+            static_cast<int>(selectionBounds.top),
+            static_cast<int>(selectionBounds.width),
+            static_cast<int>(selectionBounds.height)
+        );
+        auto command = std::make_unique<CropCommand>(currentImage, cropRect);
+        currentImage->getHistoryManager().executeCommand(std::move(command));
         currentImage->clearSelection();
     }
 }
