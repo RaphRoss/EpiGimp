@@ -8,63 +8,63 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 ## ✅ NIVEAU 1 - OUTILS DE DESSIN ESSENTIELS (COMPLÉTÉ)
 
 ### 1.1 Système de couleurs ✅
-- [x] **ColorManager** : Gestionnaire de couleurs singleton
-  - [x] Couleur de premier plan
-  - [x] Couleur d'arrière-plan
-  - [x] Historique des 20 dernières couleurs
-  - [x] Fonction swap (échange)
-  - [x] Reset aux valeurs par défaut
+- [ ] **ColorManager** : Gestionnaire de couleurs singleton
+  - [ ] Couleur de premier plan
+  - [ ] Couleur d'arrière-plan
+  - [ ] Historique des 20 dernières couleurs
+  - [ ] Fonction swap (échange)
+  - [ ] Reset aux valeurs par défaut
 
-- [x] **Sélecteur de couleur (ColorPicker)**
-  - [x] Widget HSV avec roue chromatique
-  - [x] Sliders RGB + Alpha
-  - [x] Historique des couleurs cliquable
-  - [x] Toggle avec touche `C`
-  - [x] Échange premier plan/arrière-plan avec `X`
-  - [x] Reset avec touche `D`
+- [ ] **Sélecteur de couleur (ColorPicker)**
+  - [ ] Widget HSV avec roue chromatique
+  - [ ] Sliders RGB + Alpha
+  - [ ] Historique des couleurs cliquable
+  - [ ] Toggle avec touche `C`
+  - [ ] Échange premier plan/arrière-plan avec `X`
+  - [ ] Reset avec touche `D`
 
-- [x] **Outil Pipette (Eyedropper)**
-  - [x] Prélèvement de couleur sur l'image
-  - [x] Mise à jour automatique du premier plan
+- [ ] **Outil Pipette (Eyedropper)**
+  - [ ] Prélèvement de couleur sur l'image
+  - [ ] Mise à jour automatique du premier plan
 
 ### 1.2 Outils de pinceau avancés ✅
-- [x] **Pinceau (Brush)**
-  - [x] Taille variable (1-500px)
-  - [x] Opacité réglable (0-100%)
-  - [x] Dureté du pinceau (bords doux/durs)
-  - [x] Interpolation pour traits lisses
-  - [x] Utilisation couleur de premier plan
+- [ ] **Pinceau (Brush)**
+  - [ ] Taille variable (1-500px)
+  - [ ] Opacité réglable (0-100%)
+  - [ ] Dureté du pinceau (bords doux/durs)
+  - [ ] Interpolation pour traits lisses
+  - [ ] Utilisation couleur de premier plan
 
-- [x] **Gomme (Eraser)**
-  - [x] Taille variable
-  - [x] Opacité réglable
-  - [x] Dureté réglable
-  - [x] Efface vers transparence ou couleur d'arrière-plan
+- [ ] **Gomme (Eraser)**
+  - [ ] Taille variable
+  - [ ] Opacité réglable
+  - [ ] Dureté réglable
+  - [ ] Efface vers transparence ou couleur d'arrière-plan
 
 - [ ] **Aérographe (Airbrush)**
   - [ ] Accumulation de couleur progressive
   - [ ] Débit réglable
 
 ### 1.3 Outils de remplissage ✅
-- [x] **Pot de peinture (Bucket Fill)**
-  - [x] Algorithme flood-fill (BFS)
-  - [x] Seuil de tolérance réglable
-  - [x] Remplissage de toute la sélection
-  - [x] Respect des limites de sélection
+- [ ] **Pot de peinture (Bucket Fill)**
+  - [ ] Algorithme flood-fill (BFS)
+  - [ ] Seuil de tolérance réglable
+  - [ ] Remplissage de toute la sélection
+  - [ ] Respect des limites de sélection
 
-- [x] **Dégradé (Gradient)**
-  - [x] Dégradés linéaires
-  - [x] Dégradés radiaux
-  - [x] Avant-plan → Arrière-plan
+- [ ] **Dégradé (Gradient)**
+  - [ ] Dégradés linéaires
+  - [ ] Dégradés radiaux
+  - [ ] Avant-plan → Arrière-plan
   - [ ] Avant-plan → Transparent
   - [ ] Dégradés personnalisés
   - [ ] Plus de types (conique, carré)
 
 ### 1.4 Interface utilisateur ✅
-- [x] **Panneau d'options des outils (ToolOptionsPanel)**
-  - [x] Options contextuelles selon l'outil
-  - [x] Sliders interactifs
-  - [x] Mise à jour en temps réel
+- [ ] **Panneau d'options des outils (ToolOptionsPanel)**
+  - [ ] Options contextuelles selon l'outil
+  - [ ] Sliders interactifs
+  - [ ] Mise à jour en temps réel
 
 ---
 
@@ -174,8 +174,8 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 ## 🔧 NIVEAU 4 - TRANSFORMATIONS (Priorité Moyenne)
 
 ### 4.1 Transformations de base
-- [x] Rotation 90°, 180°, 270° *(déjà fait)*
-- [x] Retournement horizontal/vertical *(déjà fait)*
+- [x] Rotation 90°, 180°, 270°
+- [x] Retournement horizontal/vertical
 - [ ] **Rotation libre**
   - [ ] Angle personnalisé
   - [ ] Point de pivot déplaçable
@@ -203,7 +203,7 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
   - [ ] Déplacement de points de contrôle
   - [ ] Modes : Move, Grow, Shrink, Twirl
 
-- [x] Recadrage (Crop) *(déjà fait)*
+- [~] Recadrage (Crop) *(implementer mais ne fonctionne pas)*
 
 ### 4.3 Transformations automatiques
 - [ ] **Corrections automatiques**
@@ -406,7 +406,7 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 ## 💾 NIVEAU 9 - FORMATS ET EXPORT (Priorité Moyenne)
 
 ### 9.1 Support de formats
-- [x] PNG *(déjà fait)*
+- [x] PNG
 - [ ] **JPEG**
   - [ ] Qualité réglable (0-100)
   - [ ] Optimisation progressive
@@ -628,7 +628,7 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 - ⏳ **Planifiées** : 127+ (85%)
 
 ### Par niveau :
-- ✅ **Niveau 1** : 100% (23/23)
+- ✅ **Niveau 1** : 0% (23/23)
 - ⏳ **Niveau 2** : 0% (0/20)
 - ⏳ **Niveau 3** : 0% (0/18)
 - ⏳ **Niveau 4** : 15% (3/20)
@@ -644,18 +644,5 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 
 ## 🚀 DERNIÈRES MISES À JOUR
 
-**23 octobre 2025** :
-- ✅ Niveau 1 complété à 100%
-- ✅ Système de couleurs complet (ColorManager, ColorPicker)
-- ✅ 5 nouveaux outils (Brush, Eraser, Eyedropper, Bucket, Gradient)
-- ✅ ToolOptionsPanel implémenté
-- ✅ Documentation complète (README, guides)
-- 📦 16 nouveaux fichiers créés
-- ✨ Compilation réussie (5.8MB)
-
-**Prochaine étape** : Niveau 2 - Système de calques
-
----
-
-**Version actuelle** : EpiGimp v2.0 (Niveau 1)  
+**Version actuelle** : EpiGimp v2.0 (Niveau 0)  
 **Dernière mise à jour** : 23 octobre 2025
