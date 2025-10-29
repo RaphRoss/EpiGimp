@@ -5,66 +5,66 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 
 ---
 
-## ✅ NIVEAU 1 - OUTILS DE DESSIN ESSENTIELS (COMPLÉTÉ)
+## ✅ NIVEAU 1 - OUTILS DE DESSIN ESSENTIELS (Priorité Haute)
 
 ### 1.1 Système de couleurs ✅
-- [ ] **ColorManager** : Gestionnaire de couleurs singleton
-  - [ ] Couleur de premier plan
-  - [ ] Couleur d'arrière-plan
-  - [ ] Historique des 20 dernières couleurs
-  - [ ] Fonction swap (échange)
-  - [ ] Reset aux valeurs par défaut
+- [x] **ColorManager** : Gestionnaire de couleurs singleton
+  - [x] Couleur de premier plan
+  - [x] Couleur d'arrière-plan
+  - [x] Historique des 20 dernières couleurs
+  - [x] Fonction swap (échange)
+  - [x] Reset aux valeurs par défaut
 
-- [ ] **Sélecteur de couleur (ColorPicker)**
-  - [ ] Widget HSV avec roue chromatique
-  - [ ] Sliders RGB + Alpha
-  - [ ] Historique des couleurs cliquable
-  - [ ] Toggle avec touche `C`
-  - [ ] Échange premier plan/arrière-plan avec `X`
-  - [ ] Reset avec touche `D`
+- [x] **Sélecteur de couleur (ColorPicker)**
+  - [x] Widget HSV (Hue + SV)
+  - [x] Sliders RGB + Alpha
+  - [x] Historique des couleurs cliquable
+  - [x] Toggle avec touche `C`
+  - [x] Échange premier plan/arrière-plan avec `X`
+  - [x] Reset avec touche `D`
 
-- [ ] **Outil Pipette (Eyedropper)**
-  - [ ] Prélèvement de couleur sur l'image
-  - [ ] Mise à jour automatique du premier plan
+- [x] **Outil Pipette (Eyedropper)**
+  - [x] Prélèvement de couleur sur l'image
+  - [x] Mise à jour automatique du premier plan
 
 ### 1.2 Outils de pinceau avancés ✅
-- [ ] **Pinceau (Brush)**
-  - [ ] Taille variable (1-500px)
-  - [ ] Opacité réglable (0-100%)
-  - [ ] Dureté du pinceau (bords doux/durs)
-  - [ ] Interpolation pour traits lisses
-  - [ ] Utilisation couleur de premier plan
+- [x] **Pinceau (Brush)**
+  - [x] Taille variable (1-500px)
+  - [x] Opacité réglable (0-100%)
+  - [x] Dureté du pinceau (bords doux/durs)
+  - [x] Interpolation pour traits lisses
+  - [x] Utilisation couleur de premier plan
 
-- [ ] **Gomme (Eraser)**
-  - [ ] Taille variable
-  - [ ] Opacité réglable
-  - [ ] Dureté réglable
-  - [ ] Efface vers transparence ou couleur d'arrière-plan
+- [x] **Gomme (Eraser)**
+  - [x] Taille variable
+  - [x] Opacité réglable
+  - [x] Dureté réglable
+  - [x] Efface vers transparence ou couleur d'arrière-plan
 
-- [ ] **Aérographe (Airbrush)**
-  - [ ] Accumulation de couleur progressive
-  - [ ] Débit réglable
+- [x] **Aérographe (Airbrush)**
+  - [x] Accumulation de couleur progressive
+  - [x] Débit réglable
 
 ### 1.3 Outils de remplissage ✅
-- [ ] **Pot de peinture (Bucket Fill)**
-  - [ ] Algorithme flood-fill (BFS)
-  - [ ] Seuil de tolérance réglable
-  - [ ] Remplissage de toute la sélection
-  - [ ] Respect des limites de sélection
+- [x] **Pot de peinture (Bucket Fill)**
+  - [x] Algorithme flood-fill (BFS)
+  - [x] Seuil de tolérance réglable
+  - [x] Remplissage de toute la sélection
+  - [x] Respect des limites de sélection
 
-- [ ] **Dégradé (Gradient)**
-  - [ ] Dégradés linéaires
-  - [ ] Dégradés radiaux
-  - [ ] Avant-plan → Arrière-plan
-  - [ ] Avant-plan → Transparent
+- [x] **Dégradé (Gradient)**
+  - [x] Dégradés linéaires
+  - [x] Dégradés radiaux
+  - [x] Avant-plan → Arrière-plan
+  - [x] Avant-plan → Transparent
   - [ ] Dégradés personnalisés
   - [ ] Plus de types (conique, carré)
 
 ### 1.4 Interface utilisateur ✅
-- [ ] **Panneau d'options des outils (ToolOptionsPanel)**
-  - [ ] Options contextuelles selon l'outil
-  - [ ] Sliders interactifs
-  - [ ] Mise à jour en temps réel
+- [x] **Panneau d'options des outils (ToolOptionsPanel)**
+  - [x] Options contextuelles selon l'outil
+  - [x] Sliders interactifs
+  - [x] Mise à jour en temps réel
 
 ---
 
@@ -294,7 +294,7 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 
 ---
 
-## 📝 NIVEAU 6 - OUTILS DE TEXTE (Priorité Moyenne)
+## 📝 NIVEAU 6 - OUTILS DE TEXTE (Priorité Haute)
 
 ### 6.1 Outil texte basique
 - [ ] **Insertion de texte**
@@ -403,7 +403,7 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 
 ---
 
-## 💾 NIVEAU 9 - FORMATS ET EXPORT (Priorité Moyenne)
+## 💾 NIVEAU 9 - FORMATS ET EXPORT (Priorité Haute)
 
 ### 9.1 Support de formats
 - [x] PNG
@@ -542,8 +542,8 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 
 ## 📊 PHASES DE DÉVELOPPEMENT RECOMMANDÉES
 
-### 🟢 Phase actuelle : Niveau 1 ✅ (TERMINÉ)
-**Durée** : Complété  
+### 🟢 Phase actuelle : Niveau 1 (EN COURS)
+**Durée** : ~
 **Objectif** : Outils de dessin de base fonctionnels
 
 ### 🔵 Phase 2 : Niveau 2 - Calques (EN COURS)

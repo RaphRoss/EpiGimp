@@ -7,6 +7,9 @@
 #include <memory>
 #include "../ui/MenuBar.hpp"
 #include "../ui/ToolPanel.hpp"
+#include "../ui/ColorPanel.hpp"
+#include "../ui/ColorPickerDialog.hpp"
+#include "../ui/ToolOptionsPanel.hpp"
 #include "../ui/NewImageDialog.hpp"
 #include "../ui/StatusBar.hpp"
 #include <iostream>
@@ -55,6 +58,9 @@ private:
     std::unique_ptr<Tool> currentTool;
     MenuBar menuBar;
     ToolPanel toolPanel;
+    ColorPanel colorPanel;
+    ColorPickerDialog colorPicker;
+    ToolOptionsPanel toolOptions;
     NewImageDialog newImageDialog;
     StatusBar statusBar;
     std::string currentToolName = "pencil";
