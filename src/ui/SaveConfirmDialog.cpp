@@ -12,7 +12,7 @@ bool SaveConfirmDialog::fontLoaded = false;
 SaveConfirmDialog::SaveConfirmDialog() {
     if (!fontLoaded) {
         if (!font.loadFromFile("src/assets/fonts/DejaVuSans-Bold.ttf")) {
-            std::cerr << "Erreur: Impossible de charger la police pour la boîte de dialogue !" << std::endl;
+            std::cerr << "Error: Unable to load font for dialog box!" << std::endl;
             fontLoaded = false;
         } else {
             fontLoaded = true;
@@ -35,7 +35,7 @@ SaveConfirmDialog::SaveConfirmDialog() {
     
     titleText.setCharacterSize(16);
     titleText.setFillColor(sf::Color::White);
-    titleText.setString("Sauvegarder les modifications ?");
+    titleText.setString("Save changes?");
     
     messageText.setCharacterSize(12);
     messageText.setFillColor(sf::Color(220, 220, 220));
@@ -51,7 +51,7 @@ void SaveConfirmDialog::setupButtons() {
     
     saveButtonText.setCharacterSize(12);
     saveButtonText.setFillColor(sf::Color::White);
-    saveButtonText.setString("Sauvegarder");
+    saveButtonText.setString("Save");
     
     dontSaveButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
     dontSaveButton.setFillColor(sf::Color(80, 80, 85));
@@ -60,7 +60,7 @@ void SaveConfirmDialog::setupButtons() {
     
     dontSaveButtonText.setCharacterSize(12);
     dontSaveButtonText.setFillColor(sf::Color::White);
-    dontSaveButtonText.setString("Ne pas sauvegarder");
+    dontSaveButtonText.setString("Don't Save");
     
     cancelButton.setSize({BUTTON_WIDTH, BUTTON_HEIGHT});
     cancelButton.setFillColor(sf::Color(80, 80, 85));
@@ -69,15 +69,15 @@ void SaveConfirmDialog::setupButtons() {
     
     cancelButtonText.setCharacterSize(12);
     cancelButtonText.setFillColor(sf::Color::White);
-    cancelButtonText.setString("Annuler");
+    cancelButtonText.setString("Cancel");
 }
 
 void SaveConfirmDialog::show(const std::string& imageName) {
     visible = true;
     currentImageName = imageName;
     
-    std::string message = "L'image \"" + imageName + "\" a été modifiée.\n";
-    message += "Voulez-vous sauvegarder les modifications avant de fermer ?";
+    std::string message = "The image \"" + imageName + "\" has been modified.\n";
+    message += "Do you want to save the changes before closing?";
     messageText.setString(message);
     
     updateLayout();
@@ -154,12 +154,15 @@ void SaveConfirmDialog::draw(sf::RenderWindow& window) {
     window.draw(cancelButtonText);
 }
 
-void SaveConfirmDialog::handleEvent(const sf::Event& event) {
+void SaveConfirmDialog::handleEvent(const sf::Event& event, sf::RenderWindow& window) {
     if (!visible) return;
     
     if (event.type == sf::Event::MouseButtonPressed) {
-        sf::Vector2f mousePos(static_cast<float>(event.mouseButton.x), 
-                             static_cast<float>(event.mouseButton.y));
+        // Use real mouse position from window to avoid titlebar offset issues
+        sf::Vector2i realPixelPos = sf::Mouse::getPosition(window);
+        // Apply vertical offset to compensate for window titlebar
+        sf::Vector2f mousePos(static_cast<float>(realPixelPos.x), 
+                             static_cast<float>(realPixelPos.y - 30));
         
         if (saveButton.getGlobalBounds().contains(mousePos)) {
             if (onSave) onSave();

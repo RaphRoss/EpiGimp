@@ -2,6 +2,12 @@
 #include "../tools/ToolFactory.hpp"
 #include "../tools/SelectTool.hpp"
 #include "Command.hpp"
+#include "ColorManager.hpp"
+#include "../tools/PencilTool.hpp"
+#include "../tools/EraserTool.hpp"
+#include "../tools/AirbrushTool.hpp"
+#include "../tools/BucketFillTool.hpp"
+#include "../tools/GradientTool.hpp"
 #include <cstdio>
 #include <string>
 
@@ -144,6 +150,11 @@ void Application::setupToolPanel() {
         currentToolName = "Pencil";
         statusBar.updateToolInfo(currentToolName);
         setupToolCallbacks();
+        if (auto t = dynamic_cast<PencilTool*>(currentTool.get())) {
+            toolOptions.configure("Pencil", "Size", 1, 500, 5, [t](float v){ t->setBrushSize(v); },
+                                               "Opacity", 0, 1, 1, [t](float v){ t->setBrushOpacity(v); },
+                                               "Hardness", 0, 1, 1, [t](float v){ t->setBrushHardness(v); });
+        }
     });
     
     toolPanel.addTool("pan", "Pan", [this]() {
@@ -153,8 +164,66 @@ void Application::setupToolPanel() {
         setupToolCallbacks();
     });
     
+    toolPanel.addTool("eyedropper", "Eyedropper", [this]() {
+        currentTool = ToolFactory::createTool("eyedropper");
+        currentToolName = "Eyedropper";
+        statusBar.updateToolInfo(currentToolName);
+        setupToolCallbacks();
+    });
+
+    toolPanel.addTool("eraser", "Eraser", [this]() {
+        currentTool = ToolFactory::createTool("eraser");
+        currentToolName = "Eraser";
+        statusBar.updateToolInfo(currentToolName);
+        setupToolCallbacks();
+        if (auto t = dynamic_cast<EraserTool*>(currentTool.get())) {
+            toolOptions.configure("Eraser", "Size", 1, 500, 20, [t](float v){ t->setSize(v); },
+                                               "Opacity", 0, 1, 1, [t](float v){ t->setOpacity(v); },
+                                               "Hardness", 0, 1, 1, [t](float v){ t->setHardness(v); });
+        }
+    });
+
+    toolPanel.addTool("airbrush", "Airbrush", [this]() {
+        currentTool = ToolFactory::createTool("airbrush");
+        currentToolName = "Airbrush";
+        statusBar.updateToolInfo(currentToolName);
+        setupToolCallbacks();
+        if (auto t = dynamic_cast<AirbrushTool*>(currentTool.get())) {
+            toolOptions.configure("Airbrush", "Size", 1, 500, 30, [t](float v){ t->setSize(v); },
+                                                  "Opacity", 0, 1, 0.2f, [t](float v){ t->setOpacity(v); },
+                                                  "Flow", 0, 1, 0.5f, [t](float v){ t->setFlow(v); });
+        }
+    });
+
+    toolPanel.addTool("bucket", "Bucket Fill", [this]() {
+        currentTool = ToolFactory::createTool("bucket");
+        currentToolName = "Bucket";
+        statusBar.updateToolInfo(currentToolName);
+        setupToolCallbacks();
+        if (auto t = dynamic_cast<BucketFillTool*>(currentTool.get())) {
+            toolOptions.configure("Bucket Fill", "Tolerance", 0, 1020, 0, [t](float v){ t->setTolerance(v); },
+                                                     "-", 0, 1, 0, nullptr,
+                                                     "-", 0, 1, 0, nullptr);
+        }
+    });
+
+    toolPanel.addTool("gradient", "Gradient", [this]() {
+        currentTool = ToolFactory::createTool("gradient");
+        currentToolName = "Gradient";
+        statusBar.updateToolInfo(currentToolName);
+        setupToolCallbacks();
+        if (auto t = dynamic_cast<GradientTool*>(currentTool.get())) {
+            toolOptions.configure("Gradient", "Opacity", 0, 1, 1, [t](float v){ t->setOpacity(v); },
+                                                  "Type(0=L,1=R)", 0, 1, 0, [t](float v){ t->setType(v<0.5f? GradientTool::Linear:GradientTool::Radial); },
+                                                  "Mode(0=FB,1=FT)", 0, 1, 0, [t](float v){ t->setMode(v<0.5f? GradientTool::FGtoBG:GradientTool::FGtoTransparent); });
+        }
+    });
+    
     toolPanel.setSelectedTool("pencil");
     statusBar.updateToolInfo("Select");
+    colorPanel.setPosition({10,610});
+    toolOptions.setPosition({10,690});
+    colorPanel.setOnOpenPicker([this](bool fg){ colorPicker.show(fg); });
 }
 
 void Application::setupToolCallbacks() {
@@ -250,9 +319,9 @@ void Application::processEvents() {
             window.close();
         }
 
-        imageManager.handleSaveDialogEvent(event);
+        imageManager.handleSaveDialogEvent(event, window);
         
-        newImageDialog.handleEvent(event);
+        newImageDialog.handleEvent(event, window);
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.control && event.key.code == sf::Keyboard::S) {
                 saveFile();
@@ -302,6 +371,18 @@ void Application::processEvents() {
             } else if (event.key.control && event.key.code == sf::Keyboard::V) {
                 Image* currentImage = imageManager.getCurrentImage();
                 if (currentImage) currentImage->pasteClipboardAsFloating();
+            } else if (event.key.code == sf::Keyboard::X) {
+                ColorManager::instance().swapColors();
+            } else if (event.key.code == sf::Keyboard::D) {
+                ColorManager::instance().reset();
+            } else if (event.key.code == sf::Keyboard::C) {
+                colorPicker.show(true);
+            } else if (event.key.code == sf::Keyboard::B) {
+                if (auto t = dynamic_cast<EraserTool*>(currentTool.get())) {
+                    static bool toTransparent = false;
+                    toTransparent = !toTransparent;
+                    t->setMode(toTransparent ? EraserTool::ToTransparent : EraserTool::ToBackground);
+                }
             }
         }
         
@@ -318,7 +399,7 @@ void Application::processEvents() {
             pixelPos = {event.mouseButton.x, event.mouseButton.y};
             pos = window.mapPixelToCoords(pixelPos);
             
-            if (!newImageDialog.isVisible()) {
+            if (!newImageDialog.isVisible() && !colorPicker.isVisible()) {
                 bool menuHandled = menuBar.handleClick(pos);
                 
                 bool tabHandled = false;
@@ -328,6 +409,7 @@ void Application::processEvents() {
                 
                 if (!menuHandled && !tabHandled && pos.y > 62) {
                     toolPanel.handleClick(pos);
+                    colorPanel.handleClick(pos, event.mouseButton.button);
                 }
             }
         }
@@ -336,16 +418,22 @@ void Application::processEvents() {
             pixelPos = {event.mouseMove.x, event.mouseMove.y};
             pos = window.mapPixelToCoords(pixelPos);
             
-            if (!newImageDialog.isVisible()) {
+            if (!newImageDialog.isVisible() && !colorPicker.isVisible()) {
                 menuBar.handleMouseMove(pos);
                 imageManager.handleTabMouseMove(pos);
                 updateStatusBar(pos);
             }
         }
         
-        if (!newImageDialog.isVisible()) {
+        if (!newImageDialog.isVisible() && !colorPicker.isVisible()) {
             handleImageInput(event);
             handleZoom(event);
+        }
+
+        if (colorPicker.isVisible()) {
+            colorPicker.handleEvent(event, window);
+        } else {
+            toolOptions.handleEvent(event);
         }
     }
 }
@@ -377,10 +465,13 @@ void Application::render() {
     }
     
     toolPanel.draw(window);
+    colorPanel.draw(window);
+    toolOptions.draw(window);
     
     imageManager.drawTabs(window);
     
     statusBar.draw(window);
+    colorPicker.draw(window);
     newImageDialog.draw(window);
     
     menuBar.draw(window);

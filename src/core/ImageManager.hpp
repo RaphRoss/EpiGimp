@@ -52,7 +52,7 @@ public:
     
     bool handleTabClick(const sf::Vector2f& mousePos);
     void handleTabMouseMove(const sf::Vector2f& mousePos);
-    void handleSaveDialogEvent(const sf::Event& event);
+    void handleSaveDialogEvent(const sf::Event& event, sf::RenderWindow& window);
     
     void setOnSaveRequest(std::function<void(size_t)> callback) { onSaveRequest = callback; }
     void setOnSaveAsRequest(std::function<void(size_t)> callback) { onSaveAsRequest = callback; }

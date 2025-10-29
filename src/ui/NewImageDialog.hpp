@@ -18,7 +18,7 @@ public:
     void hide();
     bool isVisible() const { return visible; }
     void draw(sf::RenderWindow& window);
-    void handleEvent(const sf::Event& event);
+    void handleEvent(const sf::Event& event, sf::RenderWindow& window);
     void setOnConfirm(std::function<void(int width, int height, const std::string& name)> callback);
     
 private:

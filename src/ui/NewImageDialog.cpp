@@ -33,7 +33,7 @@ NewImageDialog::NewImageDialog() {
 }
 
 void NewImageDialog::setupUI() {
-    background.setSize({1920, 1080});
+    background.setSize({10000, 10000});
     background.setFillColor(sf::Color(0, 0, 0, 180));
     dialogBox.setSize({DIALOG_WIDTH, DIALOG_HEIGHT});
     dialogBox.setPosition({(1920 - DIALOG_WIDTH) / 2, (1080 - DIALOG_HEIGHT) / 2});
@@ -262,11 +262,14 @@ void NewImageDialog::draw(sf::RenderWindow& window) {
     }
 }
 
-void NewImageDialog::handleEvent(const sf::Event& event) {
+void NewImageDialog::handleEvent(const sf::Event& event, sf::RenderWindow& window) {
     if (!visible) return;
     
     if (event.type == sf::Event::MouseButtonPressed) {
-        sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
+        // Use real mouse position from window to avoid titlebar offset issues
+        sf::Vector2i realPixelPos = sf::Mouse::getPosition(window);
+        // Apply vertical offset to compensate for window titlebar
+        sf::Vector2f mousePos(static_cast<float>(realPixelPos.x), static_cast<float>(realPixelPos.y - 30));
         
         if (confirmButton.getGlobalBounds().contains(mousePos)) {
             onConfirmClicked();

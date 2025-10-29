@@ -279,8 +279,8 @@ void ImageManager::handleTabMouseMove(const sf::Vector2f& mousePos) {
     tabManager.handleMouseMove(mousePos);
 }
 
-void ImageManager::handleSaveDialogEvent(const sf::Event& event) {
-    saveConfirmDialog.handleEvent(event);
+void ImageManager::handleSaveDialogEvent(const sf::Event& event, sf::RenderWindow& window) {
+    saveConfirmDialog.handleEvent(event, window);
 }
 
 void ImageManager::notifyImageModified(size_t imageIndex) {

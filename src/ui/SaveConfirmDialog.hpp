@@ -12,7 +12,7 @@ public:
     bool isVisible() const { return visible; }
     
     void draw(sf::RenderWindow& window);
-    void handleEvent(const sf::Event& event);
+    void handleEvent(const sf::Event& event, sf::RenderWindow& window);
     
     void setOnSave(std::function<void()> callback) { onSave = callback; }
     void setOnDontSave(std::function<void()> callback) { onDontSave = callback; }
