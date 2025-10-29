@@ -1,6 +1,7 @@
 #include "PencilTool.hpp"
 #include <cmath>
 #include <algorithm>
+#include "../core/ColorManager.hpp"
 
 PencilTool::PencilTool() {}
 
@@ -9,6 +10,7 @@ void PencilTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
     drawing = true;
     lastPos = image->worldToImage(pos);
     currentStroke = std::make_unique<StrokeCommand>(image);
+    brushColor = ColorManager::instance().getForeground();
     
     auto& texture = image->getTexture();
     drawBrushStroke(*lastPos, texture);
@@ -30,6 +32,7 @@ void PencilTool::onMouseMoved(const sf::Vector2f& pos, Image* image) {
     if (!drawing || !lastPos.has_value() || !image || !currentStroke) return;
     
     sf::Vector2f imagePos = image->worldToImage(pos);
+    brushColor = ColorManager::instance().getForeground();
     
     auto& texture = image->getTexture();
     drawSmoothLine(*lastPos, imagePos, texture);
@@ -39,15 +42,33 @@ void PencilTool::onMouseMoved(const sf::Vector2f& pos, Image* image) {
     lastPos = imagePos;
 }
 
+void PencilTool::ensureStamp() {
+    if (!stampDirty) return;
+    unsigned int sz = static_cast<unsigned int>(std::max(1.f, brushSize));
+    sf::Image img; img.create(sz, sz, sf::Color::Transparent);
+    float r = sz / 2.f;
+    for (unsigned int y=0; y<sz; ++y) {
+        for (unsigned int x=0; x<sz; ++x) {
+            float dx = (x + 0.5f) - r;
+            float dy = (y + 0.5f) - r;
+            float dist = std::sqrt(dx*dx + dy*dy);
+            if (dist > r) continue;
+            float t = dist / r;
+            float edge = std::pow(std::max(0.f, 1.f - t), brushHardness);
+            sf::Uint8 a = static_cast<sf::Uint8>(255 * brushOpacity * edge);
+            img.setPixel(x,y, sf::Color(brushColor.r, brushColor.g, brushColor.b, a));
+        }
+    }
+    brushStamp.loadFromImage(img);
+    stampDirty = false;
+}
+
 void PencilTool::drawBrushStroke(const sf::Vector2f& position, sf::RenderTexture& texture) {
-    sf::CircleShape brush(brushSize / 2.0f);
-    brush.setFillColor(sf::Color(brushColor.r, brushColor.g, brushColor.b, 
-                                static_cast<sf::Uint8>(255 * brushOpacity)));
-    brush.setPosition(position.x - brushSize / 2.0f, position.y - brushSize / 2.0f);
-    
-    sf::RenderStates states;
-    states.blendMode = sf::BlendAlpha;
-    texture.draw(brush, states);
+    ensureStamp();
+    sf::Sprite sp(brushStamp);
+    sp.setPosition(position.x - brushStamp.getSize().x/2.f, position.y - brushStamp.getSize().y/2.f);
+    sf::RenderStates states; states.blendMode = sf::BlendAlpha;
+    texture.draw(sp, states);
 }
 
 void PencilTool::drawSmoothLine(const sf::Vector2f& start, const sf::Vector2f& end, sf::RenderTexture& texture) {
