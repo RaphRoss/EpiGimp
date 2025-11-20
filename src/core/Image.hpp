@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Selection.hpp"
 #include "HistoryManager.hpp"
+#include "LayerManager.hpp"
 #include <string>
 
 class Image {
@@ -44,6 +45,9 @@ public:
     HistoryManager& getHistoryManager() { return historyManager; }
     const HistoryManager& getHistoryManager() const { return historyManager; }
     
+    LayerManager& getLayerManager() { return layerManager; }
+    const LayerManager& getLayerManager() const { return layerManager; }
+    
     void resize(unsigned int newWidth, unsigned int newHeight);
     void setImageContent(const sf::Image& newContent);
     sf::Image getImageData() const;
@@ -69,6 +73,7 @@ private:
     std::string filePath = "";
     Selection selection;
     HistoryManager historyManager;
+    LayerManager layerManager;
     void updateSprite();
     void setupTexture();
 

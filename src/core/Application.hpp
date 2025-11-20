@@ -12,6 +12,7 @@
 #include "../ui/ToolOptionsPanel.hpp"
 #include "../ui/NewImageDialog.hpp"
 #include "../ui/StatusBar.hpp"
+#include "../ui/LayerPanel.hpp"
 #include <iostream>
 
 class Application {
@@ -63,5 +64,6 @@ private:
     ToolOptionsPanel toolOptions;
     NewImageDialog newImageDialog;
     StatusBar statusBar;
+    LayerPanel layerPanel;
     std::string currentToolName = "pencil";
 };

@@ -7,6 +7,8 @@
 Image::Image(int width, int height, const std::string& name) 
     : originalSize(width, height), imageName(name) {
     setupTexture();
+    // Create initial background layer
+    layerManager.createLayer(width, height, "Background");
 }
 
 Image::Image(const std::string& filepath) {
@@ -23,11 +25,14 @@ Image::Image(const std::string& filepath) {
         renderTexture.display();
         updateSprite();
         std::cout << "Image chargée : " << filepath << std::endl;
+        // Create layer from loaded image
+        layerManager.createLayerFromImage(loadedImage, "Background");
     } else {
         std::cerr << "Erreur lors du chargement de " << filepath << std::endl;
         originalSize = sf::Vector2i(800, 600);
         imageName = "Error_Image";
         setupTexture();
+        layerManager.createLayer(800, 600, "Background");
     }
 }
 

@@ -12,10 +12,11 @@
 #include <string>
 
 Application::Application(int width, int height, const std::string& title)
-    : window(sf::VideoMode(width, height), title), statusBar(static_cast<float>(width)) {
+    : window(sf::VideoMode(width, height), title), statusBar(static_cast<float>(width)),
+      layerPanel(static_cast<float>(width) - 220, 50, 210, static_cast<float>(height) - 82) {
     window.setFramerateLimit(60);
     currentTool = ToolFactory::createTool("pencil");
-    imageManager.setViewportSize({static_cast<float>(width - 220), static_cast<float>(height - 82)});
+    imageManager.setViewportSize({static_cast<float>(width - 440), static_cast<float>(height - 82)});
     setupMenus();
     setupToolPanel();
     setupImageManagerCallbacks();
@@ -426,6 +427,7 @@ void Application::processEvents() {
         }
         
         if (!newImageDialog.isVisible() && !colorPicker.isVisible()) {
+            layerPanel.handleEvent(event, window);
             handleImageInput(event);
             handleZoom(event);
         }
@@ -467,6 +469,7 @@ void Application::render() {
     toolPanel.draw(window);
     colorPanel.draw(window);
     toolOptions.draw(window);
+    layerPanel.draw(window);
     
     imageManager.drawTabs(window);
     
@@ -483,6 +486,13 @@ void Application::render() {
 
 void Application::run() {
     while (window.isOpen()) {
+        // Update LayerPanel to show current image's layers
+        Image* currentImage = imageManager.getCurrentImage();
+        if (currentImage) {
+            layerPanel.setLayerManager(&currentImage->getLayerManager());
+            layerPanel.update();
+        }
+        
         processEvents();
         render();
     }
