@@ -64,14 +64,16 @@ void EraserTool::stampAt(Image* image, const sf::Vector2f& ipos) {
     }
 }
 
-void EraserTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+void EraserTool::onMousePressed(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image) return;
     erasing = true;
     lastPos = image->worldToImage(pos);
     stampAt(image, lastPos);
 }
 
-void EraserTool::onMouseReleased(const sf::Vector2f&, Image* image) {
+void EraserTool::onMouseReleased(const sf::Vector2f&, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image) return;
     erasing = false;
     image->markAsModified();

@@ -3,7 +3,8 @@
 #include "../core/Command.hpp"
 #include <cmath>
 
-void GradientTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+void GradientTool::onMousePressed(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image) return;
     dragging = true;
     startPos = image->worldToImage(pos);
@@ -15,7 +16,8 @@ void GradientTool::onMouseMoved(const sf::Vector2f& pos, Image* image) {
     endPos = image->worldToImage(pos);
 }
 
-void GradientTool::onMouseReleased(const sf::Vector2f& pos, Image* image) {
+void GradientTool::onMouseReleased(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image || !dragging) return;
     dragging = false;
     endPos = image->worldToImage(pos);

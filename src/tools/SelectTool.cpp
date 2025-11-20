@@ -5,7 +5,8 @@
 SelectTool::SelectTool() {
 }
 
-void SelectTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+void SelectTool::onMousePressed(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image) return;
     
     isSelecting = true;
@@ -13,7 +14,8 @@ void SelectTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
     currentPos = startPos;
 }
 
-void SelectTool::onMouseReleased(const sf::Vector2f& pos, Image* image) {
+void SelectTool::onMouseReleased(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image || !isSelecting) return;
     
     isSelecting = false;

@@ -20,14 +20,16 @@ void AirbrushTool::spray(Image* image, const sf::Vector2f& ipos, int count) {
     rt.display();
 }
 
-void AirbrushTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+void AirbrushTool::onMousePressed(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image) return;
     active = true;
     sf::Vector2f ip = image->worldToImage(pos);
     spray(image, ip, static_cast<int>(50 * flow));
 }
 
-void AirbrushTool::onMouseReleased(const sf::Vector2f&, Image* image) {
+void AirbrushTool::onMouseReleased(const sf::Vector2f&, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image) return;
     active = false;
     image->markAsModified();

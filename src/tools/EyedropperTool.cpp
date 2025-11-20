@@ -1,7 +1,8 @@
 #include "EyedropperTool.hpp"
 #include "../core/ColorManager.hpp"
 
-void EyedropperTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+void EyedropperTool::onMousePressed(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image) return;
     sf::Vector2f ip = image->worldToImage(pos);
     sf::Image data = image->getImageData();
@@ -13,6 +14,8 @@ void EyedropperTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
     ColorManager::instance().setForeground(c);
 }
 
-void EyedropperTool::onMouseReleased(const sf::Vector2f&, Image*) {}
+void EyedropperTool::onMouseReleased(const sf::Vector2f&, Image* image, sf::Mouse::Button button) {
+    (void)image; (void)button;
+}
 
 void EyedropperTool::onMouseMoved(const sf::Vector2f&, Image*) {}

@@ -9,7 +9,8 @@ static inline int colorDist(const sf::Color& a, const sf::Color& b) {
     return rd(a.r,b.r) + rd(a.g,b.g) + rd(a.b,b.b) + rd(a.a,b.a);
 }
 
-void BucketFillTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+void BucketFillTool::onMousePressed(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     if (!image) return;
     sf::Vector2f ip = image->worldToImage(pos);
     if (ip.x < 0 || ip.y < 0) return;

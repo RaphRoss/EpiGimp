@@ -5,12 +5,16 @@
 
 PencilTool::PencilTool() {}
 
-void PencilTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+void PencilTool::onMousePressed(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
     if (!image) return;
     drawing = true;
     lastPos = image->worldToImage(pos);
     currentStroke = std::make_unique<StrokeCommand>(image);
-    brushColor = ColorManager::instance().getForeground();
+    
+    // Use foreground color for left click, background color for right click
+    brushColor = (button == sf::Mouse::Right) ? 
+                  ColorManager::instance().getBackground() : 
+                  ColorManager::instance().getForeground();
     
     auto& texture = image->getTexture();
     drawBrushStroke(*lastPos, texture);
@@ -19,7 +23,7 @@ void PencilTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
     currentStroke->addPoint(*lastPos, brushColor);
 }
 
-void PencilTool::onMouseReleased(const sf::Vector2f&, Image* image) {
+void PencilTool::onMouseReleased(const sf::Vector2f&, Image* image, sf::Mouse::Button) {
     if (!image || !drawing || !currentStroke) return;
     
     drawing = false;
@@ -32,7 +36,7 @@ void PencilTool::onMouseMoved(const sf::Vector2f& pos, Image* image) {
     if (!drawing || !lastPos.has_value() || !image || !currentStroke) return;
     
     sf::Vector2f imagePos = image->worldToImage(pos);
-    brushColor = ColorManager::instance().getForeground();
+    // Keep the color that was set during onMousePressed
     
     auto& texture = image->getTexture();
     drawSmoothLine(*lastPos, imagePos, texture);

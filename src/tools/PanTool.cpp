@@ -3,7 +3,8 @@
 
 PanTool::PanTool() {}
 
-void PanTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
+void PanTool::onMousePressed(const sf::Vector2f& pos, Image* image, sf::Mouse::Button button) {
+    (void)button;
     panning = true;
     lastMousePos = pos;
     movingFloating = false;
@@ -20,7 +21,8 @@ void PanTool::onMousePressed(const sf::Vector2f& pos, Image* image) {
     }
 }
 
-void PanTool::onMouseReleased(const sf::Vector2f& /* pos */, Image* image) {
+void PanTool::onMouseReleased(const sf::Vector2f& /* pos */, Image* image, sf::Mouse::Button button) {
+    (void)button;
     panning = false;
     lastMousePos.reset();
     if (image && movingFloating && image->hasFloatingSelection()) {
