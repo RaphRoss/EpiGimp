@@ -6,9 +6,17 @@
 
 Image::Image(int width, int height, const std::string& name) 
     : originalSize(width, height), imageName(name) {
-    setupTexture();
     // Create initial background layer
     layerManager.createLayer(width, height, "Background");
+    
+    // Fill background with white
+    Layer* bg = layerManager.getActiveLayer();
+    if (bg) {
+        bg->clear(sf::Color::White);
+        bg->display();
+    }
+    
+    updateSprite();
 }
 
 Image::Image(const std::string& filepath) {
@@ -16,35 +24,43 @@ Image::Image(const std::string& filepath) {
     if (loadedImage.loadFromFile(filepath)) {
         originalSize = sf::Vector2i(loadedImage.getSize());
         imageName = filepath.substr(filepath.find_last_of("/\\") + 1);
-        setupTexture();
-        sf::Texture tempTexture;
-        tempTexture.loadFromImage(loadedImage);
-        sf::Sprite tempSprite(tempTexture);
-        renderTexture.clear(sf::Color::Transparent);
-        renderTexture.draw(tempSprite);
-        renderTexture.display();
-        updateSprite();
-        std::cout << "Image chargée : " << filepath << std::endl;
+        
         // Create layer from loaded image
         layerManager.createLayerFromImage(loadedImage, "Background");
+        
+        updateSprite();
+        std::cout << "Image chargée : " << filepath << std::endl;
     } else {
         std::cerr << "Erreur lors du chargement de " << filepath << std::endl;
         originalSize = sf::Vector2i(800, 600);
         imageName = "Error_Image";
-        setupTexture();
+        
+        // Create empty layer
         layerManager.createLayer(800, 600, "Background");
+        
+        updateSprite();
     }
 }
 
-void Image::setupTexture() {
-    renderTexture.create(originalSize.x, originalSize.y);
-    renderTexture.clear(sf::Color::White);
-    renderTexture.display();
-    updateSprite();
+// Static members initialization
+sf::RenderTexture Image::sharedCompositeBuffer;
+bool Image::sharedCompositeInitialized = false;
+
+void Image::ensureSharedComposite(unsigned int width, unsigned int height) {
+    if (!sharedCompositeInitialized || 
+        sharedCompositeBuffer.getSize().x < width ||
+        sharedCompositeBuffer.getSize().y < height) {
+        // Create or resize to accommodate the largest image
+        unsigned int newWidth = std::max(sharedCompositeBuffer.getSize().x, width);
+        unsigned int newHeight = std::max(sharedCompositeBuffer.getSize().y, height);
+        sharedCompositeBuffer.create(newWidth, newHeight);
+        sharedCompositeInitialized = true;
+    }
 }
 
 void Image::updateSprite() {
-    sprite.setTexture(renderTexture.getTexture());
+    // Sprite will be updated in draw() using composite render
+    // This function is kept for compatibility but does minimal work
     sprite.setScale(zoomLevel, zoomLevel);
     sprite.setPosition(viewPosition);
 }
@@ -53,7 +69,19 @@ sf::Image Image::clipboard;
 
 void Image::draw(sf::RenderWindow& window, const sf::Vector2f& position) {
     viewPosition = position;
-    updateSprite();
+    
+    // Render composite of all layers on demand using shared buffer
+    if (layerManager.getLayerCount() > 0) {
+        ensureSharedComposite(originalSize.x, originalSize.y);
+        sharedCompositeBuffer.clear(sf::Color::Transparent);
+        layerManager.renderComposite(sharedCompositeBuffer);
+        sharedCompositeBuffer.display();
+        
+        sprite.setTexture(sharedCompositeBuffer.getTexture());
+        sprite.setScale(zoomLevel, zoomLevel);
+        sprite.setPosition(viewPosition);
+    }
+    
     window.draw(sprite);
     
     if (floatingActive && floatingCut && floatingSrcRect.width > 0 && floatingSrcRect.height > 0) {
@@ -119,7 +147,12 @@ void Image::resetZoom() {
 }
 
 sf::RenderTexture& Image::getTexture() {
-    return renderTexture;
+    // Return the active layer's texture for drawing tools
+    Layer* activeLayer = layerManager.getActiveLayer();
+    if (!activeLayer) {
+        throw std::runtime_error("No active layer available for drawing");
+    }
+    return activeLayer->getTexture();
 }
 
 sf::Vector2f Image::getDisplaySize() const {
@@ -127,8 +160,7 @@ sf::Vector2f Image::getDisplaySize() const {
 }
 
 void Image::saveToFile(const std::string& filename) {
-    sf::Texture tex = renderTexture.getTexture();
-    sf::Image screenshot = tex.copyToImage();
+    sf::Image screenshot = layerManager.getCompositeImage();
     if (screenshot.saveToFile(filename)) {
         std::cout << "Image sauvegardée : " << filename << std::endl;
         filePath = filename;
@@ -154,17 +186,15 @@ sf::Vector2f Image::imageToWorld(const sf::Vector2f& imagePos) const {
 }
 
 void Image::resize(unsigned int newWidth, unsigned int newHeight) {
-    sf::Image currentContent = renderTexture.getTexture().copyToImage();
+    // Get current composite
+    sf::Image currentContent = layerManager.getCompositeImage();
     
     originalSize = sf::Vector2i(newWidth, newHeight);
-    renderTexture.create(newWidth, newHeight);
-    renderTexture.clear(sf::Color::Transparent);
+    // Shared composite will auto-resize on next draw
     
-    sf::Texture tempTexture;
-    tempTexture.loadFromImage(currentContent);
-    sf::Sprite tempSprite(tempTexture);
-    renderTexture.draw(tempSprite);
-    renderTexture.display();
+    // For now, just flatten to one layer on resize
+    // TODO: resize all layers individually
+    layerManager.flattenImage();
     
     updateSprite();
 }
@@ -172,21 +202,20 @@ void Image::resize(unsigned int newWidth, unsigned int newHeight) {
 void Image::setImageContent(const sf::Image& newContent) {
     sf::Vector2u newSize = newContent.getSize();
     originalSize = sf::Vector2i(newSize.x, newSize.y);
+    // Shared composite will auto-resize on next draw
     
-    renderTexture.create(newSize.x, newSize.y);
-    renderTexture.clear(sf::Color::Transparent);
-    
-    sf::Texture tempTexture;
-    tempTexture.loadFromImage(newContent);
-    sf::Sprite tempSprite(tempTexture);
-    renderTexture.draw(tempSprite);
-    renderTexture.display();
+    // Update the active layer with new content
+    Layer* activeLayer = layerManager.getActiveLayer();
+    if (activeLayer) {
+        activeLayer->setImageData(newContent);
+    }
     
     updateSprite();
 }
 
 sf::Image Image::getImageData() const {
-    return renderTexture.getTexture().copyToImage();
+    // Return composite of all layers
+    return layerManager.getCompositeImage();
 }
 
 bool Image::copySelectionToClipboard() {

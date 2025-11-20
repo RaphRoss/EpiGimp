@@ -63,13 +63,15 @@ LayerPanel::LayerPanel(float x, float y, float width, float height)
 }
 
 void LayerPanel::setLayerManager(LayerManager* manager) {
-    layerManager = manager;
-    rebuildLayerList();
+    if (layerManager != manager) {
+        layerManager = manager;
+        rebuildLayerList();
+    }
 }
 
 void LayerPanel::update() {
-    if (!layerManager) return;
-    rebuildLayerList();
+    // Don't rebuild every frame - only when explicitly needed
+    // Rebuilding is triggered by setLayerManager or explicit callbacks
 }
 
 void LayerPanel::rebuildLayerList() {
@@ -128,8 +130,9 @@ void LayerPanel::rebuildLayerList() {
 
 void LayerPanel::updateThumbnail(LayerItem& item, const Layer* layer) {
     sf::Image thumbImage = layer->getThumbnail(50, 50);
-    item.thumbnailTexture.loadFromImage(thumbImage);
-    item.thumbnail.setTexture(&item.thumbnailTexture);
+    item.thumbnailTexture = std::make_shared<sf::Texture>();
+    item.thumbnailTexture->loadFromImage(thumbImage);
+    item.thumbnail.setTexture(item.thumbnailTexture.get());
 }
 
 void LayerPanel::draw(sf::RenderWindow& window) {

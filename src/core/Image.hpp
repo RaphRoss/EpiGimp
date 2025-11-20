@@ -63,7 +63,6 @@ public:
     bool pasteClipboardAsFloating();
 
 private:
-    sf::RenderTexture renderTexture;
     sf::Sprite sprite;
     sf::Vector2i originalSize;
     float zoomLevel = 1.0f;
@@ -75,7 +74,11 @@ private:
     HistoryManager historyManager;
     LayerManager layerManager;
     void updateSprite();
-    void setupTexture();
+    
+    // Static shared composite buffer to minimize GPU memory usage
+    static sf::RenderTexture sharedCompositeBuffer;
+    static bool sharedCompositeInitialized;
+    static void ensureSharedComposite(unsigned int width, unsigned int height);
 
     bool floatingActive = false;
     sf::Image floatingImage;

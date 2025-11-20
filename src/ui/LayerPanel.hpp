@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <memory>
 
 class LayerPanel {
 public:
@@ -24,7 +25,7 @@ private:
     struct LayerItem {
         sf::RectangleShape background;
         sf::RectangleShape thumbnail;
-        sf::Texture thumbnailTexture;
+        std::shared_ptr<sf::Texture> thumbnailTexture;  // Use shared_ptr to avoid dangling pointers
         sf::Text nameText;
         sf::RectangleShape visibilityButton;
         sf::Text visibilityIcon;
@@ -35,10 +36,12 @@ private:
     float x, y, width, height;
     LayerManager* layerManager;
     
+    // Font must be declared BEFORE any sf::Text that uses it!
+    sf::Font font;
+    
     sf::RectangleShape background;
     sf::RectangleShape titleBar;
     sf::Text titleText;
-    sf::Font font;
     
     std::vector<LayerItem> layerItems;
     float scrollOffset;

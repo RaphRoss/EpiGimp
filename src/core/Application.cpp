@@ -13,7 +13,7 @@
 
 Application::Application(int width, int height, const std::string& title)
     : window(sf::VideoMode(width, height), title), statusBar(static_cast<float>(width)),
-      layerPanel(static_cast<float>(width) - 220, 50, 210, static_cast<float>(height) - 82) {
+      layerPanel(static_cast<float>(width) - 220, 70, 210, static_cast<float>(height) - 112) {
     window.setFramerateLimit(60);
     currentTool = ToolFactory::createTool("pencil");
     imageManager.setViewportSize({static_cast<float>(width - 440), static_cast<float>(height - 82)});
@@ -490,7 +490,6 @@ void Application::run() {
         Image* currentImage = imageManager.getCurrentImage();
         if (currentImage) {
             layerPanel.setLayerManager(&currentImage->getLayerManager());
-            layerPanel.update();
         }
         
         processEvents();

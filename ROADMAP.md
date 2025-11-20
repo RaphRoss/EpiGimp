@@ -628,7 +628,7 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 - ⏳ **Planifiées** : 127+ (85%)
 
 ### Par niveau :
-- ✅ **Niveau 1** : 0% (23/23)
+- ✅ **Niveau 1** : 100% (23/23)
 - ⏳ **Niveau 2** : 0% (0/20)
 - ⏳ **Niveau 3** : 0% (0/18)
 - ⏳ **Niveau 4** : 15% (3/20)
