@@ -70,49 +70,50 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 
 ## 📋 NIVEAU 2 - SYSTÈME DE CALQUES (Priorité Haute)
 
-### 2.1 Gestion basique des calques
-- [ ] **LayerManager**
-  - [ ] Structure de données pour gérer plusieurs calques
-  - [ ] Calque actif
-  - [ ] Ordre des calques (z-index)
-  - [ ] Rendu composite de tous les calques
+### 2.1 Gestion basique des calques ✅
+- [x] **LayerManager**
+  - [x] Structure de données pour gérer plusieurs calques
+  - [x] Calque actif
+  - [x] Ordre des calques (z-index)
+  - [x] Rendu composite de tous les calques
 
-- [ ] **Panneau des calques (LayerPanel)**
-  - [ ] Liste des calques avec miniatures
-  - [ ] Nom éditable pour chaque calque
-  - [ ] Indicateur de visibilité (œil)
-  - [ ] Calque actif surligné
-  - [ ] Défilement si beaucoup de calques
+- [x] **Panneau des calques (LayerPanel)**
+  - [x] Liste des calques avec miniatures
+  - [x] Nom éditable pour chaque calque
+  - [x] Indicateur de visibilité (œil)
+  - [x] Calque actif surligné
+  - [x] Défilement si beaucoup de calques
+  - [x] Mise à jour automatique en temps réel
 
-### 2.2 Opérations sur calques
-- [ ] **Création et suppression**
-  - [ ] Créer nouveau calque
-  - [ ] Dupliquer calque
-  - [ ] Supprimer calque
-  - [ ] Fusionner calques (merge down)
-  - [ ] Aplatir l'image (flatten)
+### 2.2 Opérations sur calques ✅
+- [x] **Création et suppression**
+  - [x] Créer nouveau calque
+  - [x] Dupliquer calque
+  - [x] Supprimer calque
+  - [x] Fusionner calques (merge down)
+  - [x] Aplatir l'image (flatten)
 
 - [ ] **Organisation**
   - [ ] Réorganiser par glisser-déposer
-  - [ ] Monter/Descendre un calque
+  - [x] Monter/Descendre un calque
   - [ ] Groupes de calques (dossiers)
   - [ ] Renommer calques
 
 ### 2.3 Propriétés des calques
-- [ ] **Modes de fusion (Blend Modes)**
-  - [ ] Normal
-  - [ ] Multiply
-  - [ ] Screen
-  - [ ] Overlay
-  - [ ] Addition
-  - [ ] Subtract
-  - [ ] Difference
-  - [ ] Lighten
-  - [ ] Darken
+- [x] **Modes de fusion (Blend Modes)**
+  - [x] Normal
+  - [x] Multiply
+  - [x] Screen
+  - [x] Overlay
+  - [x] Addition
+  - [x] Subtract
+  - [x] Difference
+  - [x] Lighten
+  - [x] Darken
   - [ ] Color Dodge / Burn
 
-- [ ] **Opacité et verrouillage**
-  - [ ] Opacité globale du calque (0-100%)
+- [x] **Opacité et verrouillage**
+  - [x] Opacité globale du calque (0-100%)
   - [ ] Verrouillage alpha (transparence)
   - [ ] Verrouillage position
   - [ ] Verrouillage pixels
@@ -546,18 +547,20 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 **Durée** : ~
 **Objectif** : Outils de dessin de base fonctionnels
 
-### 🔵 Phase 2 : Niveau 2 - Calques (EN COURS)
-**Durée estimée** : 2-3 semaines  
-**Objectif** : Système de calques complet avec modes de fusion
+### 🟢 Phase 2 : Niveau 2 - Calques (COMPLÉTÉ)
+**Durée** : 2 jours  
+**Objectif** : Système de calques complet avec modes de fusion ✅
 
-**Priorités** :
-1. LayerManager et structure de données
-2. LayerPanel UI
-3. Opérations de base (créer, supprimer, dupliquer)
-4. Modes de fusion essentiels
-5. Opacité par calque
+**Réalisé** :
+1. ✅ LayerManager et structure de données
+2. ✅ LayerPanel UI avec miniatures temps réel
+3. ✅ Opérations de base (créer, supprimer, dupliquer)
+4. ✅ Modes de fusion (9 modes)
+5. ✅ Opacité par calque
+6. ✅ Optimisation GPU (buffer composite partagé)
+7. ✅ Gestion mémoire multi-images
 
-### 🔵 Phase 3 : Niveau 3 - Sélections
+### 🔵 Phase 3 : Niveau 3 - Sélections (PROCHAIN)
 **Durée estimée** : 1-2 semaines  
 **Objectif** : Outils de sélection avancés
 
@@ -623,13 +626,13 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 ## 📈 MÉTRIQUES DE PROGRÈS
 
 ### Fonctionnalités totales : ~150+
-- ✅ **Complétées** : 23 (15%)
+- ✅ **Complétées** : 40 (27%)
 - 🔄 **En cours** : 0 (0%)
-- ⏳ **Planifiées** : 127+ (85%)
+- ⏳ **Planifiées** : 110+ (73%)
 
 ### Par niveau :
 - ✅ **Niveau 1** : 100% (23/23)
-- ⏳ **Niveau 2** : 0% (0/20)
+- ✅ **Niveau 2** : 85% (17/20)
 - ⏳ **Niveau 3** : 0% (0/18)
 - ⏳ **Niveau 4** : 15% (3/20)
 - ⏳ **Niveau 5** : 0% (0/30)
@@ -644,5 +647,14 @@ Développer un éditeur d'images qui ressemble au maximum à GIMP avec toutes se
 
 ## 🚀 DERNIÈRES MISES À JOUR
 
-**Version actuelle** : EpiGimp v2.0 (Niveau 0)  
-**Dernière mise à jour** : 23 octobre 2025
+**Version actuelle** : EpiGimp v2.1 (Niveau 2 complété)  
+**Dernière mise à jour** : 20 novembre 2025
+
+**Nouveautés v2.1** :
+- ✅ Système de calques complet avec LayerManager
+- ✅ LayerPanel avec miniatures temps réel
+- ✅ 9 modes de fusion (Normal, Multiply, Screen, Overlay, Addition, Subtract, Difference, Lighten, Darken)
+- ✅ Opérations : créer, dupliquer, supprimer, fusionner, aplatir
+- ✅ Opacité par calque (0-100%)
+- ✅ Optimisation GPU : buffer composite partagé entre images
+- ✅ Support multi-images sans crash
