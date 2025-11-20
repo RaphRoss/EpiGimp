@@ -286,6 +286,9 @@ void Application::handleImageInput(const sf::Event& event) {
         pixelPos = {event.mouseButton.x, event.mouseButton.y};
         pos = window.mapPixelToCoords(pixelPos);
         currentTool->onMouseReleased(pos, currentImage, event.mouseButton.button);
+        
+        // Notify layer manager to update thumbnails after drawing
+        currentImage->getLayerManager().markLayersModified();
     }
     else if (event.type == sf::Event::MouseMoved) {
         pixelPos = {event.mouseMove.x, event.mouseMove.y};
@@ -489,7 +492,13 @@ void Application::run() {
         // Update LayerPanel to show current image's layers
         Image* currentImage = imageManager.getCurrentImage();
         if (currentImage) {
-            layerPanel.setLayerManager(&currentImage->getLayerManager());
+            LayerManager& lm = currentImage->getLayerManager();
+            layerPanel.setLayerManager(&lm);
+            
+            // Connect callback to rebuild layer list when layers change
+            lm.setOnLayersChanged([this]() {
+                layerPanel.refresh();
+            });
         }
         
         processEvents();

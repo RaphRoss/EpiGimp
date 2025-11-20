@@ -39,6 +39,7 @@ public:
     
     // Callbacks for UI updates
     void setOnLayersChanged(std::function<void()> callback) { onLayersChanged = callback; }
+    void markLayersModified() { notifyLayersChanged(); }  // Public method to trigger update
     
 private:
     std::vector<std::unique_ptr<Layer>> layers;

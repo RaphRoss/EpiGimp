@@ -12,6 +12,7 @@ public:
     
     void setLayerManager(LayerManager* manager);
     void update();
+    void refresh() { rebuildLayerList(); }  // Public method to force refresh
     void draw(sf::RenderWindow& window);
     void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
     
