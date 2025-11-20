@@ -278,13 +278,13 @@ void Application::handleImageInput(const sf::Event& event) {
         pixelPos = {event.mouseButton.x, event.mouseButton.y};
         pos = window.mapPixelToCoords(pixelPos);
         if (imageManager.isPositionInCurrentImage(pos)) {
-            currentTool->onMousePressed(pos, currentImage);
+            currentTool->onMousePressed(pos, currentImage, event.mouseButton.button);
         }
     }
     else if (event.type == sf::Event::MouseButtonReleased) {
         pixelPos = {event.mouseButton.x, event.mouseButton.y};
         pos = window.mapPixelToCoords(pixelPos);
-        currentTool->onMouseReleased(pos, currentImage);
+        currentTool->onMouseReleased(pos, currentImage, event.mouseButton.button);
     }
     else if (event.type == sf::Event::MouseMoved) {
         pixelPos = {event.mouseMove.x, event.mouseMove.y};
